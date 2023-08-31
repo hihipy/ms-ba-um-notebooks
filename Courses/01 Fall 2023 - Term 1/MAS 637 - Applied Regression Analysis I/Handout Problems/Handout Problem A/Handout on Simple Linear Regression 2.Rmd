@@ -1,0 +1,32 @@
+---
+title: "Handout on Simple Linear Regression 2"
+author: "Philip Bachas-Daunert"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Handout on Simple Linear Regression 2
+
+## 1. A sample of 10 billionaires is selected, and the person’s age and net worth (in billions) are compared. The data are given here: X (age): 56, 39, 42, 60, 84, 37, 68, 66, 73, 55 & Y (net worth in Billions USD): 18, 14, 12, 14, 11, 10, 10, 7, 7, 5
+
+### 1. (a & b) Find $\widehat{y}$ for each x & find a residual for each x.
+
+```{r}
+x = c(56, 39, 42, 60, 84, 37, 68, 66, 73, 55)
+y = c(18, 14, 12, 14, 11, 10, 10, 7, 7, 5)
+
+df = data.frame(x , y)
+
+model = lm(y~x, data = df)
+
+data.frame(df, y_hat = fitted(model), e = residuals(model))
+
+```
+
+### 1. (c) Calculate the sum of squares total (SST).
+
+```{r}
+
+SST = sum()
+
+```
