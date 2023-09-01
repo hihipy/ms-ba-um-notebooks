@@ -5,19 +5,19 @@ date: "`r Sys.Date()`"
 output: pdf_document
 ---
 
-# Handout on Simple Linear Regression 2
+# Questions
 
-## 1. A sample of 10 billionaires is selected, and the person’s age and net worth (in billions) are compared. The data are given here: X (age): 56, 39, 42, 60, 84, 37, 68, 66, 73, 55 & Y (net worth in Billions USD): 18, 14, 12, 14, 11, 10, 10, 7, 7, 5
+## 1. A sample of 10 billionaires is selected, and the person’s age and net worth (in billions) are compared. The data are given here: X (age): 56, 39, 42, 60, 84, 37, 68, 66, 73, 55 | Y (net worth in Billions USD): 18, 14, 12, 14, 11, 10, 10, 7, 7, 5
 
 ### 1. (a & b) Find $\widehat{y}$ for each x & find a residual for each x.
 
 ```{r}
-x = c(56, 39, 42, 60, 84, 37, 68, 66, 73, 55)
-y = c(18, 14, 12, 14, 11, 10, 10, 7, 7, 5)
+age = c(56, 39, 42, 60, 84, 37, 68, 66, 73, 55)
+netB = c(18, 14, 12, 14, 11, 10, 10, 7, 7, 5)
 
-df = data.frame(x , y)
+df = data.frame(age , netB)
 
-model = lm(y~x, data = df)
+model = lm(netB~age, data = df)
 
 data.frame(df, y_hat = fitted(model), e = residuals(model))
 
@@ -30,3 +30,150 @@ data.frame(df, y_hat = fitted(model), e = residuals(model))
 SST = sum()
 
 ```
+
+### 1. (d) Calculate the sum of squares regression (SSR).
+
+```{r}
+
+
+
+```
+
+### 1. (e) Calculate the sum of squares due to error (SSE).
+
+```{r}
+
+
+
+```
+
+### 1. (f) Calculate the coefficient of determination ($R^{2}$).
+
+```{r}
+
+
+
+```
+
+### 1. (g) Calculate the mean square error (MSE).
+
+```{r}
+
+
+
+```
+
+### 1. (h) Calculate the root mean square error (RMSE).
+
+```{r}
+
+
+
+```
+
+### 1. (i) Calculate the standard error of the slope estimate ($b_{1}$).
+
+```{r}
+
+
+
+```
+
+### 1. (j) Calculate the t-value for the slope estimate ($b_{1}$).
+
+```{r}
+
+
+
+```
+
+### 1. (k) Calculate the standard error of the intercept estimate ($b_{0}$).
+
+```{r}
+
+
+
+```
+
+### 1. (l) Calculate the t-value for the intercept estimate ($b_{0}$).
+
+```{r}
+
+
+
+```
+
+### 1. (m) Calculate the t-value for the intercept estimate ($b_{0}$).
+
+```{r}
+
+
+
+```
+
+\newpage
+
+## 2. The data on price ($) and the overall score for six stereo headphones tested by *Consumer Reports* were as follows (*Consumer Reports* website, March 5, 2012): Brand: Bose , Skullcandy , Koss , Phillips/O’Neill,  Denon , JVC | Price (USD): 180 , 150 , 95 , 70 , 70 , 35 | Score: 76 , 71 , 61 , 56 , 40 , 26
+
+### 2. (a) Find the linear regression equation that predicts the Score based on Price. State the parameter estimates to 2 places past the decimal.
+
+```{r}
+
+
+
+```
+
+### 2. (b) Calculate the SST, SSR, and SSE.
+
+
+```{r}
+
+
+
+```
+
+### 2. (c) Compute the coefficient of determination ($R^{2}$).
+
+```{r}
+
+
+
+```
+
+### 2. (d) Compute the root mean square error (RMSE).
+
+```{r}
+
+
+
+```
+
+### 2. (e) Calculate the standard error of the slope estimate ($b_{1}$).
+
+```{r}
+
+
+
+```
+
+### 2. (f) Perform a t-test.
+
+```{r}
+
+
+
+```
+
+### 2. (g) Does the t test indicate a significant relationship between price and the overall score? What is your conclusion?
+
+*type answer here*
+
+### 2. (g) Test for a significant relationship using the F-test. What is your conclusion?
+
+```{r}
+
+
+
+```
+
+*type answer here*
