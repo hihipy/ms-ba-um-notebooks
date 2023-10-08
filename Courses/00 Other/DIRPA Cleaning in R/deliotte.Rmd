@@ -1,0 +1,294 @@
+---
+title: "DIRPA Cleaning in R"
+output:
+  html_document: 
+    toc: yes
+    toc_float: yes
+    df_print: tibble
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	eval = T,
+	message = FALSE,
+	warning = FALSE,
+	comment = NA
+)
+
+library(tidyverse)
+library(tibble)
+library(readxl)
+
+# Custom function to show number of unique values per column
+unique_overview = function(data) {
+  data |>
+    summarise_all(~n_distinct(.)) |>
+    t() |>
+    as.data.frame() |>
+    setNames(c("n_unique")) |>
+    rownames_to_column(var = "column")
+}
+
+df = read_excel('deliotte.xlsx')
+```
+
+```{r Explore, echo=TRUE}
+# Checking the Overall Structure of the Data
+glimpse(df)  
+# The function glimpse() from the dplyr package is used to print a concise 
+# summary of a dataframe (df), providing a quick look of the variable 
+# names, their type, and a few of their values.
+
+# Checking Unique Values
+unique_overview(df)  
+# Assuming unique_overview is a custom function or from a specific library, 
+# it is likely utilized to return or print a summary about the unique 
+# values in each column of the dataframe (df). This could help in identifying 
+# categorical variables and understanding data diversity.
+
+# Checking for Missing Values
+df |> 
+  summarize(across(everything(), ~sum(is.na(.))))
+# The above code is utilizing a combination of summarize(), across(), and 
+# is.na() functions in order to determine the number of NA (missing) values 
+# in each column of the dataframe (df). 
+# - summarize() will create summary statistics of different variables. 
+# - across(everything()) applies the summarization across all columns. 
+# - ~sum(is.na(.)) calculates the sum of all NA values per column.
+
+# Issues/Items to Clean:
+# Here the programmer identified potential issues in the data that need cleaning 
+# before further analysis or modelling is done. This is a vital step in data preprocessing.
+# Each item specifies the column and a brief description of what needs to be adjusted:
+# - 'Place' should be converted from character to integer.
+# - 'Ag' should be changed from character to integer.
+# - 'Gun Tim', 'Net Tim', and 'Pace' should be converted from character (in MM:SS format) 
+#   to double by translating the time to total seconds.
+# This documentation helps to guide the subsequent data cleaning and transformation processes.
+
+# Note: The '#$' symbols are likely used for easy navigation between different cleaning 
+# items, and the character descriptions and transformation objectives are clear for 
+# future reference or for other developers.
+```
+
+```{r Cleaning}
+# Data Cleaning and Transformation Process
+cleaned_df = df |>  
+  mutate(  
+
+    Place = as.integer(Place),
+    Ag = as.integer(Ag),
+    
+    `Gun Tim` = str_remove_all(`Gun Tim`, "[^\\d:]") |> 
+      str_extract_all("\\d+") |>  
+      map_dbl(~ as.numeric(.x[[1]]) * 60 + as.numeric(.x[[2]])),
+    
+    `Net Tim` = str_remove_all(`Net Tim`, "[^\\d:]") |>  
+      str_extract_all("\\d+") |>  
+      map_dbl(~ as.numeric(.x[[1]]) * 60 + as.numeric(.x[[2]])),
+
+    # Applying similar cleaning to 'Pace'
+    Pace = str_remove_all(Pace, "[^\\d:]") |>  
+      str_extract_all("\\d+") |>  
+      map_dbl(~ as.numeric(.x[[1]]) * 60 + as.numeric(.x[[2]]))  
+  ) |> 
+  separate(`Div/Tot`, into = c("Div", "Tot"), sep = "/") |>  
+  mutate(  
+    Div = as.integer(Div),
+    Tot = as.integer(Tot)
+  ) |> 
+  drop_na(Place, Div, Tot, `Gun Tim`, `Net Tim`, Pace) |> 
+  rename(
+    `Gun Tim (sec)` = `Gun Tim`,
+    `Net Tim (sec)` = `Net Tim`,
+    `Pace (sec)` = Pace
+  )
+
+glimpse(cleaned_df)
+
+cleaned_df |> 
+  summarize(across(everything(), ~sum(is.na(.))))
+```
+
+```{r Export}
+# Using the write_csv function to save the cleaned DataFrame to a CSV file.
+write_csv(cleaned_df, "cleaned_data_phil_del.csv")
+```
+
+#Question 1
+
+What are the mean, median, mode, and range of the race results for all
+racers by gender?
+
+```{r Q1}
+# Define a custom function to calculate mode.
+# The mode is the value that appears most frequently in a data set.
+calculate_mode = function(x) {
+  # 'table(x)' creates a table of the counts of each unique value in x.
+  tbl = table(x)
+  
+  # Find the highest frequency (most occurrences) among the unique values.
+  max_freq = max(tbl)
+  
+  # Find the value(s) that correspond to the maximum frequency.
+  # 'names(tbl)' provides the unique values in x,
+  # 'tbl == max_freq' identifies which of these have the maximum frequency,
+  # and 'as.numeric()' converts these value(s) from character to numeric (if they aren't already).
+  mode = as.numeric(names(tbl[tbl == max_freq]))
+  
+  # Return the mode value(s).
+  return(mode)
+}
+
+# Use the pipe operator (%>%) to chain together a sequence of operations using 'cleaned_df'.
+cleaned_df |> 
+  # Group data by the 'Gender' variable. This means subsequent operations will be
+  # performed separately on each subset of the data defined by unique gender values.
+  group_by(Gender) |> 
+  
+  # Summarise various statistics for each gender group:
+  summarise(
+    # Calculate and display the mean of 'Net Tim (sec)', ignoring NA values.
+    `Mean (sec)` = mean(`Net Tim (sec)`, na.rm = TRUE),
+    
+    # Calculate and display the median of 'Net Tim (sec)', ignoring NA values.
+    `Median (sec)` = median(`Net Tim (sec)`, na.rm = TRUE),
+    
+    # Calculate and display the mode of 'Net Tim (sec)' using the custom function.
+    `Mode (sec)` = calculate_mode(`Net Tim (sec)`),
+    
+    # Calculate and display the range of 'Net Tim (sec)', ignoring NA values.
+    # Range is computed as the difference between the maximum and minimum values.
+    `Range (sec)` = max(`Net Tim (sec)`, na.rm = TRUE) - min(`Net Tim (sec)`, na.rm = TRUE)
+  ) 
+```
+
+#Question 2
+
+Analyze the difference between gun and net time race results.
+
+```{r Q2}
+#Descriptive Statistics
+cleaned_df |> 
+  summarize(
+    # Calculate the mean gun time
+    mean_gun_time = mean(`Gun Tim (sec)`),
+    # Calculate the median gun time
+    median_gun_time = median(`Gun Tim (sec)`),
+    # Find the minimum gun time
+    min_gun_time = min(`Gun Tim (sec)`),
+    # Find the maximum gun time
+    max_gun_time = max(`Gun Tim (sec)`),
+    # Calculate the mean net time
+    mean_net_time = mean(`Net Tim (sec)`),
+    # Calculate the median net time
+    median_net_time = median(`Net Tim (sec)`),
+    # Find the minimum net time
+    min_net_time = min(`Net Tim (sec)`),
+    # Find the maximum net time
+    max_net_time = max(`Net Tim (sec)`)
+  )
+
+#Overall Difference
+cleaned_df |> 
+  summarize(
+    # Calculate the mean difference between gun time and net time
+    mean_difference = mean(`Gun Tim (sec)` - `Net Tim (sec)`)
+  )
+
+#Gender-wise Difference
+cleaned_df |> 
+  group_by(Gender) |>  # Group data by 'Gender'
+  summarize(
+    # Calculate the mean difference between gun time and net time for each gender group
+    mean_difference = mean(`Gun Tim (sec)` - `Net Tim (sec)`)
+  )
+
+#Age Group Analysis
+cleaned_df |> 
+  mutate(
+    # Create new variable 'age_group' based on age categories
+    age_group = case_when(
+      Ag < 20 ~ "Under 20",  # Assign 'Under 20' to those with age less than 20
+      Ag >= 20 & Ag < 30 ~ "20-29",  # Assign '20-29' for ages between 20 and 29
+      Ag >= 30 & Ag < 40 ~ "30-39",  # Assign '30-39' for ages between 30 and 39
+      Ag >= 40 & Ag < 50 ~ "40-49",  # Assign '40-49' for ages between 40 and 49
+      Ag >= 50 ~ "50+"  # Assign '50+' for ages 50 and above
+    )
+  ) |> 
+  group_by(age_group) |>  # Group data by 'age_group'
+  summarize(
+    # Calculate the mean difference between gun time and net time for each age group
+    mean_difference = mean(`Gun Tim (sec)` - `Net Tim (sec)`)
+  )
+
+#Visualization
+cleaned_df |> 
+  mutate(
+    # Create a new column 'difference' that stores the difference between gun time and net time
+    difference = `Gun Tim (sec)` - `Net Tim (sec)`
+  ) |> 
+  ggplot(aes(x = difference)) +  # Specify 'difference' as the variable for the x-axis
+    geom_histogram(binwidth=400, fill="cornflowerblue", color='black', alpha=0.5) +  # Plot a histogram with specified binwidth and color
+    labs(title = "Difference Between Gun Time and Net Time",  # Add a title to the plot
+         x = "Difference (seconds)",  # Label the x-axis
+         y = "Frequency") +  # Label the y-axis
+    theme_minimal()  # Apply a minimal theme to the plot
+```
+
+#Question 3
+
+3.  How much time separates Chris Doe from the top 10 percentile of
+    racers of the same division?
+
+```{r Q3}
+# 1. Identify Chris Doe's division and time
+# Filter the dataframe to get the row with Chris Doe's details
+chris_doe = cleaned_df|> 
+  filter(Name == "Chris Doe")|>
+  select(Name, Div, `Net Tim (sec)`)
+
+# Print Chris's details for reference
+print(chris_doe)
+
+# 2. Calculate the top 10 percentile time in Chris's division
+# Get all racers in Chris's division and calculate the 90th percentile time
+top_10_percentile_time_sec = cleaned_df|> 
+  filter(Div == chris_doe$Div)|>  # Filter by Chris's division
+  summarise(top_10_perc_time = quantile(`Net Tim (sec)`, 0.90))  # Calculate the 90th percentile time
+
+# Print the top 10 percentile time for reference
+print(top_10_percentile_time_sec)
+
+# 3. Calculate the time difference
+# Calculate how much time Chris needs to make up to reach the top 10 percentile in his division
+time_difference = top_10_percentile_time_sec$top_10_perc_time - chris_doe$`Net Tim (sec)`
+
+# Print the result
+cat("Chris Doe needs to improve by", time_difference, 
+            "seconds to reach the top 10 percentile in their division.")
+```
+
+#Question 4
+
+Compare the race results of each division.
+
+```{r Q4}
+# STEP 1: ANALYZE THE DATA
+# Compute summary statistics for each division.
+
+division_summary = cleaned_df|>
+  group_by(Div)|>
+  summarise(
+    mean_time_sec = mean(`Net Tim (sec)`, na.rm = TRUE),
+    median_time_sec = median(`Net Tim (sec)`, na.rm = TRUE),
+    min_time_sec = min(`Net Tim (sec)`, na.rm = TRUE),
+    max_time_sec = max(`Net Tim (sec)`, na.rm = TRUE),
+    sd_time_sec = sd(`Net Tim (sec)`, na.rm = TRUE),
+    n_racers = n(),
+    .groups = 'drop'  # Ensure a dataframe is returned
+  )
+
+# Display the summary statistics for each division
+print(division_summary)
+```
