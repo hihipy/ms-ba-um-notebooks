@@ -21,7 +21,7 @@ Click on "Develop mode", change the program to use * rather than +, and try runn
 Click on "Submit mode" again, and click "Submit for grading". Observe that all test cases are passed, and you've earned 3 of 3 points.
 """
 
-user_num = int(input())
+user_num = int(input())      # Input a number
 user_num_squared = user_num * user_num  # Bug here; fix it when instructed
    
-print(user_num_squared)       # Output formatting issue here; fix it when instructed
+print(user_num_squared) # Output formatting issue here; fix it when instructed

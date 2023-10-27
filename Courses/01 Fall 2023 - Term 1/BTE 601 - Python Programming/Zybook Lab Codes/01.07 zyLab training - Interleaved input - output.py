@@ -19,8 +19,15 @@ Try submitting it for grading (click "Submit mode", then "Submit for grading"). 
 Remove the code that echoes the user's input back to the output, and submit again. Now the test cases should all pass.
 """
 
-print('Enter x: ')
-x = int(input())
+# Print prompt asking user to input a value for x
+print('Enter x: ')  
 
-#print(x) # Student mistakenly is echoing the input to output to match example
-print('x doubled is:', (2 * x))
+# Get user input and convert to integer
+x = int(input())   
+
+# Print text describing what will be output
+print('x doubled is:')
+
+# Calculate x doubled by multiplying x by 2 
+# Print the result
+print(2 * x)

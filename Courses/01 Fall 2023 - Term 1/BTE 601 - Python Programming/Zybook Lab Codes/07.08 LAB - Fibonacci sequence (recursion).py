@@ -11,14 +11,28 @@ fibonacci(7) is 13
 Note: Use recursion and DO NOT use any loops.
 '''
 
+# Recursive function to calculate nth Fibonacci number
 def fibonacci(n):
-    if n == 1 or n == 0:
-        return n
-    elif n > 1:
-        return (fibonacci(n-1) + fibonacci(n-2))
-    else:  # n is negative
-        return -1  # Return -1 for any negative index
 
+  # Base case
+  if n == 1 or n == 0:  
+    return n
+  
+  # Recursive case
+  elif n > 1:
+    return (fibonacci(n-1) + fibonacci(n-2))
+
+  # Error case  
+  else: 
+    return -1 # Return -1 for any negative index
+  
 if __name__ == "__main__":
-    start_num = int(input())
-    print(f'fibonacci({start_num}) is {fibonacci(start_num)}')
+
+  # Get user input
+  start_num = int(input())  
+
+  # Call fibonacci function
+  result = fibonacci(start_num)
+
+  # Print result
+  print(f'fibonacci({start_num}) is {result}')

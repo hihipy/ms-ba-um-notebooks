@@ -28,4 +28,3 @@ if cleaned_string == cleaned_string[::-1]:
     print(f"palindrome: {s}")
 else:
     print(f"not a palindrome: {s}")
-

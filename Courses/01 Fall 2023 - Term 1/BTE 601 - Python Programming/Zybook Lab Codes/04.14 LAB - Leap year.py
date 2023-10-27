@@ -24,9 +24,16 @@ the output is:
 1913 - not a leap year
 """
 
+# Get year as input from user
 input_year = int(input())
 
+# Check if year is a leap year
 if ((input_year % 4 == 0 and input_year % 100 != 0) or (input_year % 400 == 0)):
-    print(f"{input_year} - leap year")
+  
+  # Print leap year message
+  print(f"{input_year} - leap year") 
+
 else:
-    print(f"{input_year} - not a leap year")
+
+  # Print not a leap year message
+  print(f"{input_year} - not a leap year")

@@ -14,15 +14,22 @@ function swap_values() returns and the main program outputs:
 The program must define and call the following function.
 def swap_values(user_val1, user_val2, user_val3, user_val4)
 """
+# Function to swap values 
 def swap_values(user_val1, user_val2, user_val3, user_val4):
-    return user_val2, user_val1, user_val4, user_val3
+
+  # Return values swapped
+  return user_val2, user_val1, user_val4, user_val3
 
 if __name__ == '__main__':
-    user_val1 = int(input())
-    user_val2 = int(input())
-    user_val3 = int(input())
-    user_val4 = int(input())
-    
-    user_val1, user_val2, user_val3, user_val4 = swap_values(user_val1, user_val2, user_val3, user_val4)
-    
-    print(user_val1, user_val2, user_val3, user_val4)
+
+  # Get user input
+  user_val1 = int(input())
+  user_val2 = int(input()) 
+  user_val3 = int(input())
+  user_val4 = int(input())
+
+  # Call swap function
+  user_val1, user_val2, user_val3, user_val4 = swap_values(user_val1, user_val2, user_val3, user_val4)
+
+  # Print swapped values
+  print(user_val1, user_val2, user_val3, user_val4)

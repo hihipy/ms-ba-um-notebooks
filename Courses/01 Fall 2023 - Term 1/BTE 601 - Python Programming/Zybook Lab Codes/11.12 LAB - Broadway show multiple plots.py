@@ -53,37 +53,43 @@ An image containing two scatter plots comparing a particular month's capacity ve
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Get input files 
 file1 = input()
 file2 = input()
 
 # Read in .csv files as dataframes
-df1 = pd.read_csv(file1)
+df1 = pd.read_csv(file1)  
 df2 = pd.read_csv(file2)
 
-# Print each dataframe individually
+# Print each dataframe  
 print(df1)
 print(df2)
 
-# Create plots for both July and December in one image
-fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))  # 1 row, 2 columns
+# Create subplots with 1 row, 2 columns
+fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 5)) 
 
-# Plotting for July's data (left subplot)
+# Plotting for first dataframe (left subplot)
 axes[0].scatter(df1['Gross Potential'], df1['Capacity'], color='blue', alpha=0.5)
-axes[0].set_title(f"{df1['Month'].iloc[0]} {df1['Year'].iloc[0]}")
+axes[0].set_title(f"{df1['Month'].iloc[0]} {df1['Year'].iloc[0]}")  
 axes[0].set_xlabel("Gross Potential")
 axes[0].set_ylabel("Capacity")
 axes[0].grid(True, linestyle='--', linewidth=0.5)
 
-# Plotting for December's data (right subplot)
+# Plotting for second dataframe (right subplot) 
 axes[1].scatter(df2['Gross Potential'], df2['Capacity'], color='red', alpha=0.5)
 axes[1].set_title(f"{df2['Month'].iloc[0]} {df2['Year'].iloc[0]}")
 axes[1].set_xlabel("Gross Potential")
 axes[1].set_ylabel("Capacity")
 axes[1].grid(True, linestyle='--', linewidth=0.5)
 
-# Set main title for the figure
-fig.suptitle("Capacity vs. Gross Potential")
+# Set main title  
+fig.suptitle("Capacity vs. Gross Potential")  
 
-plt.tight_layout()
+# Adjust layout 
+plt.tight_layout()  
+
+# Save figure 
 plt.savefig('subplots.png')
+
+# Show plot
 plt.show()

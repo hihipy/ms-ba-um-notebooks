@@ -16,10 +16,20 @@ Amount: $1.25
 For simplicity, assume input is non-negative.
 """
 
-n = int(input())
+# Get number of nickels
+n = int(input())  
+
+# Get number of dimes
 d = int(input())
+
+# Get number of quarters
 q = int(input())
 
-dollars = (.25 * q) + (.1 * d) + (.05 * n)
+# Calculate total value 
+# Nickels are 5 cents each
+# Dimes are 10 cents each
+# Quarters are 25 cents each
+dollars = (.25 * q) + (.10 * d) + (.05 * n) 
 
+# Print total formatted as currency
 print(f'Amount: ${dollars:.2f}')

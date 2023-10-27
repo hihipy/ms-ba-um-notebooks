@@ -12,15 +12,20 @@ the output is:
 3
 """
 
+# Get three integer inputs
 x = int(input())
-y = int(input())
+y = int(input()) 
 z = int(input())
 
+# Check which value is smallest
 if (x <= y and x <= z):
-    print(x)
+  # If x is smallest, print x
+  print(x) 
 
 elif (y <= x and y <= z):
-    print(y)
+  # If y is smallest, print y
+  print(y)
 
 else:
-    print(z)
+  # Otherwise z must be smallest, print z
+  print(z)
