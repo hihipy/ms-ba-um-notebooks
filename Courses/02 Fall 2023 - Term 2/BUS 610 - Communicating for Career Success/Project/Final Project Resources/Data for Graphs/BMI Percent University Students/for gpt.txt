@@ -1,0 +1,49 @@
+Please convert below into a r code line chart.
+
+
+| Survey Year | % BMI is Underweight (<18.5) | % BMI is Normal weight (18.5-24.9) | % BMI is Overweight (25.0-29.9) | % BMI is Obese (≥30.0) |
+|---|---|---|---|---|
+| 1976-1980 | 5.9 | 70.5 | 18.2 | 5.5 |
+| 1988-1994 | 5.8 | 59.4 | 20.0 | 14.8 |
+| 1999-2000 | 4.5 | 48.1 | 27.5 | 19.9 |
+| 2001-2002 | 4.2 | 52.6 | 23.8 | 19.3 |
+| 2003-2004 | 4.2 | 49.0 | 23.1 | 23.8 |
+| 2005-2006 | 5.8 | 47.1 | 22.6 | 24.5 |
+| 2007-2008 | 5.1 | 50.2 | 23.1 | 21.6 |
+| 2009-2010 | 2.7 | 48.7 | 22.6 | 26.0 |
+| 2011-2012 | 5.7 | 51.7 | 21.6 | 21.1 |
+| 2013-2014 | 4.2 | 48.3 | 24.5 | 22.9 |
+| 2015-2016 | 2.9 | 42.6 | 26.2 | 27.3 |
+| 2017-2018 | 3.7 | 34.0 | 24.8 | 32.6 |
+
+I want you to also use the following ggplot theme to do so:
+
+````
+# Load necessary libraries
+library(ggplot2)
+library(extrafont)
+
+# Load fonts for Mac (if you're on Windows, use loadfonts(device = "win"))
+loadfonts(device = "mac")
+
+# Define color scheme
+primary_color <- "#039E80"
+secondary_color <- "#144156"
+accent_color <- "#FF6F61"
+
+# Custom ggplot theme function
+theme_custom <- function(base_size = 12, base_family = "Nunito Sans") {
+  theme_minimal(base_size = base_size, base_family = base_family) +
+  theme(
+    text = element_text(family = base_family, color = secondary_color),
+    plot.title = element_text(family = "Nunito Sans", face = "bold", hjust = 0.5, color = secondary_color),
+    plot.subtitle = element_text(hjust = 0.5),
+    plot.caption = element_text(size = 8),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.background = element_rect(fill = "white", color = NA),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+}
+````

@@ -1,0 +1,69 @@
+---
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# Load necessary libraries
+library(extrafont)
+library(ggplot2)
+library(treemapify)
+
+# Load fonts
+loadfonts(device = "pdf")  # Load fonts for use in PDFs on Mac
+
+# Define color scheme
+primary_color <- "#039E80"
+secondary_color <- "#144156"
+accent_color <- "#FF6F61"
+accent2_color <- "#DAA520"
+accent3_color <- "#5DADE2"
+accent4_color <- "#58D68D"
+accent5_color <- "#AAB7B8"
+accent6_color <- "#F5B7B1"
+accent7_color <- "#D7BDE2"
+
+# Custom ggplot theme function
+theme_custom <- function() {
+  theme_minimal() + 
+    theme(
+      text = element_text(family = "Nunito Sans", color = secondary_color, size = 12),
+      plot.title = element_text(family = "Nunito Sans", face = "bold", hjust = 0.5, color = secondary_color, size = 14),
+      plot.subtitle = element_text(hjust = 0.5, size = 12),
+      plot.caption = element_text(size = 8),  
+      plot.background = element_rect(fill = "white", color = "black", linewidth = 1),  # Set plot background with black border using linewidth
+      panel.background = element_rect(fill = "white", color = NA),
+      panel.border = element_blank(),  # Remove panel border
+      legend.background = element_rect(fill = "white", color = NA),
+      legend.title = element_text(face = "bold", size = 10),
+      legend.text = element_text(size = 9),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 10),
+      axis.text.y = element_text(size = 10),
+      axis.title.x = element_text(size = 12),
+      axis.title.y = element_text(size = 12)
+    )
+}
+
+# Data Preparation
+investment_amount <- 500000
+investment_data <- data.frame(
+  Category = c("Sales & Marketing", "R & D", "Customer Service", "Other"),
+  Amount = c(investment_amount * 0.60, 
+             investment_amount * 0.25, 
+             investment_amount * 0.10, 
+             investment_amount * 0.05),  # 5% for "Other"
+  fill_colors = c(primary_color, secondary_color, accent_color, accent2_color)
+)
+
+# Create a Treemap
+treemap <- ggplot(investment_data, aes(area = Amount, fill = fill_colors, label = paste0(Category, "\n$", formatC(Amount, format = "f", big.mark = ",", digits = 0), "\n", scales::percent(Amount/investment_amount))
+)) +
+  geom_treemap(color = "black") +  # Add black outline
+  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", grow = TRUE) +
+  scale_fill_identity() +
+  theme_custom() +
+  labs(fill = "Category")
+
+# Plot the treemap
+treemap
+```
