@@ -1,0 +1,3 @@
+MAS 632. MANAGEMENT SCIENCE MODELS FOR DECISION MAKING. 2 CREDIT HOURS.
+
+This course aims to familiarize the student with Management Science tools for business systems analysis and improvement. The coverage includes linear and integer programming models, project management, simulation, queuing, and decision analysis. Some widely used software are illustrated through examples and case studies derived from business applications.
