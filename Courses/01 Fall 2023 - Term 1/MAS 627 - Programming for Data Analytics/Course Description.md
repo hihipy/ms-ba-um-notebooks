@@ -1,0 +1,3 @@
+MAS 627. PROGRAMMING FOR DATA ANALYTICS. 2-3 CREDIT HOURS.
+
+This course will provide an introduction to various programming languages useful in data analytics. Topics covered will include cleaning, manipulating, exploring and visualizing data, as well as communicating results and reproducibility. While this course will cover wide range of topics in detail, students are not expected to have prior experience with any languages covered throughout the course.
