@@ -1,0 +1,3 @@
+MAS 639. DATA ACQUISITION, PREPARATION, AND VISUALIZATION. 2 CREDIT HOURS.
+
+This course teaches using statistical computing software to get a better understanding of what problems can occur (and what solutions exist) when dealing with a variety of data types and sources. It will also discuss how to address data visualization and how to leverage current methods and software to best communicate with results and decision with stakeholders.
