@@ -1,0 +1,3 @@
+MGT 642. Supply Chain Analytics. 2-3 Credit Hours.
+
+This course studies key decision areas in supply chain design and operation. Students will learn what data are needed and how to use data to measure supply chain performance. They will also learn to apply various tools and methods to analyze trends, extract knowledge and business intelligence, and make decisions. Through the analysis and discussion of case studies, they will get useful insights on how to optimize the value of supply chain processes and operations, to streamline the goals and to design flexible supply chains.
