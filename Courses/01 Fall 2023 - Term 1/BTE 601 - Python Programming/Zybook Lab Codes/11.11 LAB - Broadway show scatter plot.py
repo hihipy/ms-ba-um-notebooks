@@ -1,4 +1,4 @@
-'''
+"""
 11.11 LAB: Broadway show scatter plot
 The Broadway dataset contains data for Broadway shows' Capacity (percentage of the theatre filled) and Gross Potential (maximum amount that can be earned) for multiple shows in a specific month and year.
 
@@ -39,33 +39,45 @@ the output using the print() function should be:
 and the output figure (saved in output_fig.png) is:
 
 A figure containing a scatter plot of Gross Potential vs Capacity of the Broadway dataset. The size of each mark is proportional to the value of the Gross Potential.
-'''
+"""
 import matplotlib.pyplot as plt
 import pandas as pd
 
-file = input()
 
-# Read in CSV file as a dataframe
-df = pd.read_csv(file)
+def read_csv_and_add_size(file_name):
+    """
+    Reads a CSV file into a pandas DataFrame and adds a new column 'Size'.
+    :param file_name: The name of the CSV file to read.
+    :return: DataFrame with an added 'Size' column.
+    """
+    df = pd.read_csv(file_name)
+    df['Size'] = df['Gross Potential'] / 2
+    return df
 
-# Insert a column to the dataframe as the last column
-# Label the column "Size", which contains half the values in column "Gross Potential"
-df['Size'] = df['Gross Potential'] / 2
 
-# Output dataframe
-print(df)
+def plot_gross_potential_vs_capacity(df):
+    """
+    Creates a scatter plot of 'Gross Potential' vs 'Capacity'.
+    :param df: DataFrame containing the data to be plotted.
+    """
+    plt.scatter(df['Capacity'], df['Gross Potential'], c='orange', s=df['Size'], marker='x')
+    plt.xlabel('Capacity', fontsize=10)
+    plt.ylabel('Gross Potential', fontsize=10)
+    plt.title('Gross Potential vs Capacity', fontsize=16)
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.savefig('output_fig.png')
+    plt.show()
 
-# Create scatter plot
-plt.scatter(df['Capacity'], df['Gross Potential'], c='orange', s=df['Size'], marker='x')
 
-# Add axis labels and title
-plt.xlabel('Capacity', fontsize=10)
-plt.ylabel('Gross Potential', fontsize=10)
-plt.title('Gross Potential vs Capacity', fontsize=16)
+def main():
+    """
+    Main function to execute the script.
+    """
+    file_name = input("Enter the CSV file name: ")
+    df = read_csv_and_add_size(file_name)
+    print(df)
+    plot_gross_potential_vs_capacity(df)
 
-# Add gridlines
-plt.grid(True, linestyle='--', linewidth=0.5)
 
-# Save figure as output_fig.png
-plt.savefig('output_fig.png')
-plt.show()
+if __name__ == "__main__":
+    main()

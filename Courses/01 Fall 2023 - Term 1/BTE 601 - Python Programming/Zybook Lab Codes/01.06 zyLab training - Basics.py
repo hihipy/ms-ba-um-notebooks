@@ -1,4 +1,5 @@
-"""1.6 zyLab training: Basics
+"""
+1.6 zyLab training: Basics
 While the zyLab platform can be used without training, a bit of training may help some students avoid common issues.
 
 The assignment is to get an integer from input, and output that integer squared, ending with newline. (Note: This assignment is configured to have students programming directly in the zyBook. Instructors may instead require students to upload a file). Below is a program that's been nearly completed for you.
@@ -21,7 +22,16 @@ Click on "Develop mode", change the program to use * rather than +, and try runn
 Click on "Submit mode" again, and click "Submit for grading". Observe that all test cases are passed, and you've earned 3 of 3 points.
 """
 
-user_num = int(input())      # Input a number
-user_num_squared = user_num * user_num  # Bug here; fix it when instructed
-   
-print(user_num_squared) # Output formatting issue here; fix it when instructed
+# The program takes an integer input from the user and outputs the square of that integer,
+# followed by a newline character. This is a simple exercise intended for practice on the zyLab platform.
+
+# Prompt the user to input an integer and convert the input to an integer type.
+user_num = int(input())
+
+# Calculate the square of the input number.
+# This is done by multiplying the number by itself.
+user_num_squared = user_num * user_num
+
+# Output the squared number followed by a newline character.
+# The newline character is important to match the expected output format exactly.
+print(user_num_squared, end='\n')

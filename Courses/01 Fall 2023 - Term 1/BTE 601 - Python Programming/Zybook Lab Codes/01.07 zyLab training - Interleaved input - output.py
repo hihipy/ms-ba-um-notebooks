@@ -18,16 +18,19 @@ The program below incorrectly echoes the user's input to the output.
 Try submitting it for grading (click "Submit mode", then "Submit for grading"). Notice that the test cases fail. The first test case's highlighting indicates that output 3 and newline were not expected. In the second test case, the -5 and newline were not expected.
 Remove the code that echoes the user's input back to the output, and submit again. Now the test cases should all pass.
 """
+# The program is designed to prompt the user for an integer input and output double that integer.
+# It is important to note that the program should not echo the user's input, only provide the expected output.
 
-# Print prompt asking user to input a value for x
-print('Enter x: ')  
+# Output a prompt to the user; no newline is needed after this prompt because input() will follow.
+print('Enter x: ', end='')
 
-# Get user input and convert to integer
-x = int(input())   
+# Get input from the user and convert it to an integer.
+# The input function automatically adds a newline after the user presses "Enter".
+x = int(input())
 
-# Print text describing what will be output
+# Output the description of the next value that will be printed. This is part of the expected output.
 print('x doubled is:')
 
-# Calculate x doubled by multiplying x by 2 
-# Print the result
+# Calculate x doubled by multiplying x by 2 and print the result.
+# No additional text is printed here, just the result.
 print(2 * x)

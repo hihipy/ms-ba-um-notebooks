@@ -32,7 +32,17 @@ Step 1 complete
 Step 2 as well
 All steps now complete
 """
+# This program is designed to demonstrate incremental development by printing out statements
+# corresponding to the completion of each step in a multi-step zyLab assignment.
 
+# Step 1: Output the completion of step 1.
+# This print statement is the first of three, indicating the completion of the first part of the assignment.
 print("Step 1 complete")
+
+# Step 2: Output the completion of step 2.
+# The following print statement adds confirmation that the second step has also been completed.
 print("Step 2 as well")
+
+# Step 3: Output the completion of all steps.
+# The final print statement indicates that all steps of the assignment have now been completed.
 print("All steps now complete")

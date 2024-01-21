@@ -23,17 +23,18 @@ the output is:
 
 1913 - not a leap year
 """
+# This program determines whether a given year is a leap year according to the Gregorian calendar rules.
+# A leap year is a year with an extra day, February 29th, added to keep the calendar year synchronized
+# with the astronomical year.
 
-# Get year as input from user
-input_year = int(input())
+# Prompt the user to input a year and store the value as an integer.
+input_year = int(input("Enter a year to check if it's a leap year: "))
 
-# Check if year is a leap year
-if ((input_year % 4 == 0 and input_year % 100 != 0) or (input_year % 400 == 0)):
-  
-  # Print leap year message
-  print(f"{input_year} - leap year") 
-
+# A year is a leap year if it is divisible by 4, except for end-of-century years, which must be divisible by 400.
+# This means that the year must be divisible by 4 and not divisible by 100 unless it is also divisible by 400.
+if (input_year % 4 == 0 and input_year % 100 != 0) or (input_year % 400 == 0):
+    # If the conditions are met, print that the year is a leap year.
+    print(f"{input_year} - leap year")
 else:
-
-  # Print not a leap year message
-  print(f"{input_year} - not a leap year")
+    # If the conditions are not met, print that the year is not a leap year.
+    print(f"{input_year} - not a leap year")

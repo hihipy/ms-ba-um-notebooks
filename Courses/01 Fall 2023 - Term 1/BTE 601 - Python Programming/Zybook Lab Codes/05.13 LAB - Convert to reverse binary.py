@@ -15,18 +15,25 @@ the output is:
 011
 6 in binary is 110; the algorithm outputs the bits in reverse.
 """
+# This program converts a positive integer to its binary representation in reverse order.
+# It follows an algorithm that repeatedly divides the number by 2 and records the remainder.
 
-# Input a positive integer
-num = int(input())
+# Request and store a positive integer from the user.
+num = int(input("Enter a positive integer: "))
 
-# Initialize an empty string to store the reverse binary representation
+# Initialize an empty string to hold the reverse binary digits.
 reverse_binary = ''
 
-# Perform the reverse binary conversion
+# The loop will continue until the number is reduced to zero.
 while num > 0:
-    remainder = num % 2  # Calculate the remainder when dividing by 2
-    reverse_binary += str(remainder)  # Append the remainder (0 or 1) to the string
-    num //= 2  # Divide num by 2, discarding the fractional part
+    # Calculate the remainder (0 or 1) when the current number is divided by 2.
+    remainder = num % 2
 
-# Output the reverse binary representation
+    # Add the string representation of the remainder to the reverse binary string.
+    reverse_binary += str(remainder)
+
+    # Update the number by integer division by 2, which discards any fractional part.
+    num //= 2
+
+# Once the loop completes, output the string of binary digits in reverse order.
 print(reverse_binary)

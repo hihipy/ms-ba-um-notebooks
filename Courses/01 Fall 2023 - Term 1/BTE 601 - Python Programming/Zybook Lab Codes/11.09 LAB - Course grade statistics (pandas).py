@@ -1,4 +1,4 @@
-'''
+"""
 11.9 LAB: Course grade statistics (pandas)
 Given the file name of a .tsv file read from user input containing student names and the respective course assignment grades, complete a program that performs the following tasks:
 
@@ -48,34 +48,66 @@ Midterm2    22.634045
 Final       22.210358
 
 NOTE: Download StudentInfo.tsv to view the contents of the file.
-'''
+"""
 import pandas as pd
 
-file_name = input()
 
-# Read in file_name as a dataframe
-df = pd.read_csv(file_name, delimiter='\t')
+def read_dataframe(file_name):
+    """
+    Reads a TSV file into a pandas DataFrame.
+    :param file_name: The name of the TSV file to read.
+    :return: DataFrame created from the TSV file.
+    """
+    return pd.read_csv(file_name, delimiter='\t')
 
-# Output rows by descending Final scores
-sorted_df = df.sort_values(by='Final', ascending=False)
-print(sorted_df.to_string(index=True))
 
-print("\nMax Scores:")
-# Output the max scores of each assignment
-max_scores = df.max(numeric_only=True)
-print(max_scores.to_string())
+def print_sorted_final_scores(df):
+    """
+    Prints the students' names and grades in descending order of Finals scores.
+    :param df: DataFrame containing student grades.
+    """
+    sorted_df = df.sort_values(by='Final', ascending=False)
+    print(sorted_df.to_string(index=True))
 
-print("\nMedian Scores:")
-# Output the median scores of each assignment
-median_scores = df.median(numeric_only=True)
-print(median_scores.to_string())
 
-print("\nAverage Scores:")
-# Output the average scores of each assignment.
-average_scores = df.mean(numeric_only=True)
-print(average_scores.to_string())
+def print_max_scores(df):
+    """
+    Prints the maximum scores of each assignment.
+    :param df: DataFrame containing student grades.
+    """
+    print("\nMax Scores:")
+    max_scores = df.max(numeric_only=True)
+    print(max_scores.to_string())
 
-print("\nStandard Deviation:")
-# Output the standard deviation of each assignment.
-std_dev = df.std(numeric_only=True)
-print(std_dev.to_string())
+
+def print_median_average_std(df):
+    """
+    Prints the median, average, and standard deviation of each assignment's scores.
+    :param df: DataFrame containing student grades.
+    """
+    print("\nMedian Scores:")
+    median_scores = df.median(numeric_only=True)
+    print(median_scores.to_string())
+
+    print("\nAverage Scores:")
+    average_scores = df.mean(numeric_only=True)
+    print(average_scores.to_string())
+
+    print("\nStandard Deviation:")
+    std_dev = df.std(numeric_only=True)
+    print(std_dev.to_string())
+
+
+def main():
+    """
+    Main function to execute the program.
+    """
+    file_name = input("Enter the TSV file name: ")
+    df = read_dataframe(file_name)
+    print_sorted_final_scores(df)
+    print_max_scores(df)
+    print_median_average_std(df)
+
+
+if __name__ == "__main__":
+    main()

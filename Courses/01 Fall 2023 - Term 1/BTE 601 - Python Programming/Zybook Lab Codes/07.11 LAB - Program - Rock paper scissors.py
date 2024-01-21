@@ -1,4 +1,4 @@
-'''
+"""
 7.11 LAB*: Program: Rock paper scissors
 Program Specifications Write a program to play an automated game of Rock, Paper, Scissors. Two players make one of three hand signals at the same time. Hand signals represent a rock, a piece of paper, or a pair of scissors. Each combination results in a win for one of the players. Rock crushes scissors, paper covers rock, and scissors cut paper. A tie occurs if both players make the same signal. Use a random number generator of 0, 1, or 2 to represent the three signals.
 
@@ -62,49 +62,50 @@ Anna wins with scissors
 Tie
 Anna wins with scissors
 Anna wins 2 and Bert wins 1
-'''
-
+"""
 import random
 
+# Constants for the game choices
 ROCK = 0
 PAPER = 1
 SCISSORS = 2
 
-# Read random seed to support testing (do not alter) and starting credits
-seed = int(input())
-# Set the seed for random
-random.seed(int(seed))
+# Initialize the random number generator with a seed for reproducibility.
+# This is important for testing to ensure consistent results.
+seed = int(input("Enter seed: "))
+random.seed(seed)
 
-# Step 1: Read names and number of rounds
-player1_name = input()
-player2_name = input()
+# Step 1: Read the names of the players and the number of rounds.
+player1_name = input("Enter Player 1 name: ")
+player2_name = input("Enter Player 2 name: ")
 
-# Continue reading number of rounds if value is below one and provide an error message
-rounds = int(input())
+# Ensure the number of rounds is positive; prompt again if it is not.
+rounds = int(input("Enter the number of rounds: "))
 while rounds < 1:
     print("Rounds must be > 0")
-    rounds = int(input())
+    rounds = int(input("Re-enter the number of rounds: "))
 
 print(f"{player1_name} vs {player2_name} for {rounds} rounds")
 
-# Step 4: Repeat steps 2 and 3 for the number of rounds
+# Step 4: Play the specified number of rounds and keep track of each player's wins.
 player1_wins = 0
 player2_wins = 0
 
-for i in range(rounds):
-    # Step 2: Generate random values for both players until they do not match
+for _ in range(rounds):
+    # Step 2: Generate random choices for each player.
     player1_choice = random.randint(0, 2)
     player2_choice = random.randint(0, 2)
-    
+
+    # If both players choose the same, it's a tie, and the loop continues until it's not a tie.
     while player1_choice == player2_choice:
         print("Tie")
         player1_choice = random.randint(0, 2)
         player2_choice = random.randint(0, 2)
-    
-    # Step 3: Identify winner for this round
-    if (player1_choice == ROCK and player2_choice == SCISSORS) or \
-       (player1_choice == PAPER and player2_choice == ROCK) or \
-       (player1_choice == SCISSORS and player2_choice == PAPER):
+
+    # Step 3: Determine the winner of the round.
+    if ((player1_choice == ROCK and player2_choice == SCISSORS) or
+            (player1_choice == PAPER and player2_choice == ROCK) or
+            (player1_choice == SCISSORS and player2_choice == PAPER)):
         print(f"{player1_name} wins with", end=" ")
         if player1_choice == ROCK:
             print("rock")
@@ -123,5 +124,5 @@ for i in range(rounds):
             print("scissors")
         player2_wins += 1
 
-# After all rounds, output total wins for each player
+# Output the total number of wins for each player after all rounds are complete.
 print(f"{player1_name} wins {player1_wins} and {player2_name} wins {player2_wins}")

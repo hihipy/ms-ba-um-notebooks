@@ -1,35 +1,34 @@
-"""
-6.17 LAB: Swapping variables
-Define a function named swap_values that takes four integers as parameters and swaps the first with the second, and the third with the fourth values. Then write a main program that reads four integers from input, calls function swap_values() to swap the values, and prints the swapped values on a single line separated with spaces.
+# This program includes a function that swaps the values of two pairs of integers,
+# and a main program that reads four integers, uses the function to swap the values, 
+# and prints the results.
 
-Ex: If the input is:
-
-3
-8
-2
-4
-function swap_values() returns and the main program outputs:
-
-8 3 4 2
-The program must define and call the following function.
-def swap_values(user_val1, user_val2, user_val3, user_val4)
-"""
-# Function to swap values 
 def swap_values(user_val1, user_val2, user_val3, user_val4):
+    """
+    Swaps the first parameter with the second, and the third parameter with the fourth.
+    
+    Parameters:
+    user_val1 (int): The first integer value.
+    user_val2 (int): The second integer value.
+    user_val3 (int): The third integer value.
+    user_val4 (int): The fourth integer value.
+    
+    Returns:
+    tuple: A tuple containing the swapped values.
+    """
+    # Swap the first and second values, as well as the third and fourth values, then return them.
+    return user_val2, user_val1, user_val4, user_val3
 
-  # Return values swapped
-  return user_val2, user_val1, user_val4, user_val3
 
+# Check if the script is the main program and not being imported as a module.
 if __name__ == '__main__':
+    # Read four integer values from user input.
+    user_val1 = int(input("Enter the first integer: "))
+    user_val2 = int(input("Enter the second integer: ")) 
+    user_val3 = int(input("Enter the third integer: "))
+    user_val4 = int(input("Enter the fourth integer: "))
 
-  # Get user input
-  user_val1 = int(input())
-  user_val2 = int(input()) 
-  user_val3 = int(input())
-  user_val4 = int(input())
+    # Call the swap_values function to swap the values.
+    user_val1, user_val2, user_val3, user_val4 = swap_values(user_val1, user_val2, user_val3, user_val4)
 
-  # Call swap function
-  user_val1, user_val2, user_val3, user_val4 = swap_values(user_val1, user_val2, user_val3, user_val4)
-
-  # Print swapped values
-  print(user_val1, user_val2, user_val3, user_val4)
+    # Print the swapped values on a single line separated by spaces.
+    print(user_val1, user_val2, user_val3, user_val4)
