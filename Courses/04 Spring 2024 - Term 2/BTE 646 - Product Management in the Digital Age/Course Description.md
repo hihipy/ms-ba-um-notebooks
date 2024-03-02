@@ -1,0 +1,3 @@
+BTE 646. Product Management in the Digital Age. 2-3 Credit Hours.
+
+This course offers the fundamentals of product management and the variety of skills that a product manager needs to succeed across the digital product innovation process. The course deals with the exploration, execution, and business model phases of product management. As such, it covers the role of a product manager, the changing nature of products, customer-centric inquiry, data analytics for product development, prototyping, product releases, product road mapping, management of cross-functional teams, project management metrics and execution, agile work, product scaling, product ecosystem, product design ethics, and so on.

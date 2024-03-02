@@ -1,0 +1,1113 @@
+---
+title: "Interview Candidate Assignment"
+author: "Philip Bachas-Daunert"
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    theme: readable
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    highlight: tango
+    fig_caption: yes
+    df_print: paged
+    number_sections: true
+    self_contained: yes
+    mathjax: "default"
+    message: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r '0 - setup', include=FALSE}
+# **General Output Settings**
+# Control output behavior for knitted documents 
+knitr::opts_chunk$set(
+  message = FALSE, # Suppress code execution messages
+  warning = FALSE, # Suppress code execution warnings 
+  comment = NA    # Exclude R code comments from final output
+) 
+
+# **Core Data Manipulation and Visualization**
+library(tidyverse) # Load the suite of 'tidy' data tools 
+
+# **Time Series Packages**
+library(lubridate)  # Work with dates and times effectively
+library(forecast)   # Forecasting functions
+library(tseries)    # Classic time series analysis methods
+library(astsa)      # More advanced time series tools
+library(tsDyn)      # Analysis of time series dynamics
+
+# **Evaluation Metrics**
+library(Metrics)  # Functions to compute accuracy measures
+
+# **Optional - Presentation and Formatting**
+library(gridExtra)  # For grid plotting
+library(kableExtra) # Enhanced table styling
+library(knitr)      # Document formatting tools
+library(readr)      # Tools for reading data files
+library(scales)     # Scaling functions for visualizations 
+
+```
+
+# Prompt
+
+Dear Candidate,
+
+Thank you for spending your valuable time with us during the Logitech
+interview. We are happy to announce that you have been shortlisted for
+the next phase of our hiring.
+
+Attached below is some simple mock up data. The intention is a simple
+analytical exercise for you, to enable us to assess your coding and
+analytical skills.
+
+You are not expected to spend more than 2 hours on this assignment.
+
+What we are looking for:
+
+1.  Ability to visualize and provide insights on the data provided.\
+2.  Ability to code, wrangle data in the language of your preference (it
+    can be either R or Python, R preferred).\
+3.  Ability to work with unclean data.\
+4.  Maturity in coding style.
+5.  Critique solution and offer next steps, if any.
+
+## Task Overview
+
+1.  Data exploration: Look into the data and tell us about your
+    findings. For instance, one finding might be around yearly growth
+    rates, but it's up to you to identify interesting information.
+    Graphs that complement this are welcomed.\
+2.  Forecasting: Please create a 12 month forecast for some of the most
+    important product categories. You are again free to choose one or
+    several forecast algorithms.
+
+## Data File Details
+
+-   The attached csv file contains monthly sales data for various
+    product categories/regions. The data is not from Logitech but an
+    external data source and randomly modified. We still require that
+    you treat this information confidentially and do not share it with
+    anyone. Please delete the data once the recruitment process is
+    terminated.\
+-   You can freely choose the technical tools you use for the analysis,
+    with a preference for R.\
+-   The data is almost but not entirely clean, so please check data
+    quality first.
+
+## Submission
+
+1.  A summary document containing your findings for the data
+    exploration, charts of your forecasts and a description of your
+    forecast method(s).
+2.  The various scripts you used for the assignment.
+3.  A csv file containing the forecast data.
+
+# EDA
+
+## Initital EDA
+
+(Code and output hidden; see .rmd for code)
+
+```{r '1 - Quick EDA', echo=FALSE}
+# **File Handling**
+# Define the path to the input CSV file
+file_path <- "interview_use_case.csv" 
+
+# Ensure the file exists before proceeding
+if (!file.exists(file_path)) {
+  stop("File does not exist: ", file_path) 
+}
+
+# Read the CSV data into a data frame
+data <- read_csv(file_path) 
+
+# **Data Exploration Functions**
+
+# Function to view a dynamic sample of the dataset, useful for large files
+dynamic_head_check <- function(data, max_rows = 25, proportion = 0.05) {
+  num_rows <- min(max_rows, round(nrow(data) * proportion)) 
+  head_rows <- head(data, n = num_rows) 
+
+  # Format and style the table 
+  kable(head_rows, "html", escape = FALSE) |> 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                  full_width = FALSE, font_size = 12) |>
+    row_spec(0, background = "black", color = "white") |> 
+    scroll_box(width = "100%", height = "500px")
+}
+
+# Function to report missing values in the dataset
+check_missing_values <- function(data) {
+  na_counts <- colSums(is.na(data)) 
+
+  if (any(na_counts > 0)) {
+    print(na_counts[na_counts > 0]) # Print columns with missing values and counts
+    print(sum(is.na(data)))         # Total count of missing values
+  } else {
+    cat("No missing values\n") 
+  }
+}
+
+# **Initial Data Checks**
+dynamic_head_check(data)    # Display a dynamic top portion of the data
+glimpse(data)               # Get a quick overview of the data structure
+check_missing_values(data)  # Check for missing data
+
+# **Data Analysis**
+# Calculate frequency counts of combinations 
+combination_counts <- data |>
+  count(Category1, Category2, Category3, sort = TRUE)
+
+# **Output Formatting**  
+# Style and format a scrollable table displaying combination counts 
+combination_counts_table <- combination_counts |>
+  kable("html", escape = FALSE, caption = "<span style='color: black;'>Combinations and Counts</span>") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE, font_size = 12) |>
+  row_spec(0, background = "black", color = "white") |> 
+  scroll_box(width = "100%", height = "500px") 
+
+# Display the formatted table
+combination_counts_table 
+
+```
+
+## Wrangle the Data
+
+(Code and output hidden; see .rmd for code)
+
+```{r '1.a - Wrangle the Data', echo=FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+# Assuming 'data' is your dataset
+
+# Filter out rows with missing values in all three category columns
+data_filtered <- data |>
+  filter(!(is.na(Category1) & is.na(Category2) & is.na(Category3)))
+
+# Pivot the dataset from wide to long format, focusing on monthly data columns
+data_long <- data_filtered |>
+  pivot_longer(
+    cols = !c(Category1, Category2, Category3), # Selects all columns except Category1, Category2, Category3
+    names_to = "Date",
+    values_to = "Value"
+  ) |>
+  mutate(
+    # Reformat the Date from '15-May' to '2015-05-01'
+    Year = str_extract(Date, "^\\d{2}"),
+    Month = str_extract(Date, "[A-Za-z]+$"),
+    Date = paste0("20", Year, "-", Month, "-01"),
+    Date = as.Date(Date, format = "%Y-%b-%d")
+  ) |>
+  select(-Year, -Month)  # Remove the intermediate Year and Month columns
+
+# Keeping the data as is for time series analysis, with each row a unique date-category combination
+data_wrangled <- data_long
+
+# Display a glimpse of data_wrangled to verify the structure and check for NA Dates
+glimpse(data_wrangled)
+# Check for NA dates  
+sum_na <- sum(is.na(data_wrangled$Date))
+cat("Number of NA Dates:", sum_na, "\n")
+
+```
+
+## Final EDA
+
+(Code and output hidden; see .rmd for code)
+
+```{r '1.b - Final EDA', include=FALSE}
+# **Data Preparation and Verification**
+
+# Assuming 'data_wrangled' is your dataset with 'Date' and 'Value' columns
+data_wrangled |> glimpse()  # Get a summary of the data structure
+
+# Filter for meaningful analysis 
+data_non_zero <- data_wrangled |>
+  filter(Value > 0)           # Keep only rows with positive 'Value'
+
+# **Calculations**
+
+# Calculate a reference point for percentages
+overall_total_value <- sum(data_non_zero$Value) 
+
+# **Data Aggregation and Metrics**
+
+data_summary <- data_non_zero |>
+  group_by(Category1, Category2, Category3) |>  # Group data by category combinations
+  summarise(
+    StartMonth = min(Date),      # First month with a non-zero value
+    EndMonth = max(Date),        # Last month with a non-zero value
+    TotalValue = sum(Value, na.rm = TRUE),   # Total 'Value' across the category
+    MonthsCount = length(unique(format(Date, "%Y-%m"))), # Distinct months
+    ValuePerMonth = TotalValue / MonthsCount,    # Average 'Value' per month
+    PercentageOfTotal = (TotalValue / overall_total_value) * 100  # Proportion of overall value
+  )
+
+# **Formatting Results**
+
+data_summary <- data_summary |>
+  mutate(
+    TotalValue = dollar(TotalValue),         # Format as currency
+    ValuePerMonth = dollar(ValuePerMonth),   # Format as currency 
+    PercentageOfTotal = sprintf("%.2f%%", PercentageOfTotal) # Format as percentage 
+  )
+
+# **Sorting for Insights**
+
+data_summary <- data_summary |>
+  arrange(desc(parse_number(ValuePerMonth))) # Sort by 'ValuePerMonth' (descending)
+
+# **Output and Reporting**
+
+cat("\nOverall total value in the dataset:", dollar(overall_total_value), "\n") # Print overall value
+
+data_summary |>
+  kable("html", escape = FALSE, caption = "<span style='color: black;'>Summary of Category Combinations Sorted by Value Per Month</span>") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE, font_size = 12) |>
+  scroll_box(width = "100%", height = "500px") # Create a scrollable table
+
+# **Optional - Export Data**
+
+file_path <- "data_wrangled.csv" 
+if (!file.exists(file_path)) { 
+  write.csv(data_wrangled, file_path, row.names = FALSE)  # Save as CSV if the file doesn't exist
+  cat("File has been written to:", file_path, "\n") 
+} else { 
+  cat("File already exists. No new file was written to avoid duplication.\n") 
+} 
+
+```
+
+## EDA Analysis
+
+Following the Exploratory Data Analysis (EDA), I plan to create time
+series objects from the following Category Code combinations:
+
+-   **A, A, M**
+-   **B, C, W**
+-   **C, C, W**
+
+My rationale:
+
+-   **Coverage:** These three combinations represent approximately
+    $\approx 15.11\% \,(A, A, M) + \approx 11.68\% \,(B, C, W) + \approx 11.48\% \,(C, C, W) \approx 38.77\%$
+    of the dataset's total value (USD \$5,659,237,273.00).
+-   **Representation:** They conveniently include one of each value from
+    Category 1.
+
+I believe these combinations offer the best holistic chance of
+predicting future values due to their significant influence on the
+dataset.
+
+# Time Series Model Selection
+
+## Check for Date or DF
+
+```{r '2 - Check for Date or DF', echo=TRUE}
+# Assign data to ts_data (assuming 'data_wrangled' is already prepared)
+ts_data <- data_wrangled
+
+# Data Validation: Ensure essential structure for time series analysis
+if (!is.data.frame(ts_data) || !any(tolower(names(ts_data)) == "date")) {
+  stop("Error: 'ts_data' is not a dataframe or 'date' column does not exist.") # Stop execution if the data is invalid
+}
+
+# Confirmation Message (if the code reaches here, validation checks have passed)
+print("Check passed: 'ts_data' is a dataframe and contains a 'date' column.")
+
+```
+
+## Convert Column(s) to TS
+
+```{r '3 - Convert Column(s) to TS', echo=TRUE}
+# Assumptions (Make sure these align with your data)
+# - 'ts_data' is loaded with columns: Category1, Category2, Category3, Date, Value
+# - Your  goal is to create separate time series for different category combinations
+
+# Parameters 
+start_date <- as.Date("2013-01-01") 
+end_date <- as.Date("2016-08-31") 
+frequency <- 12 # Monthly data
+
+# Predefined Category Combinations 
+categories <- list(
+  c("A", "A", "M"), 
+  c("B", "C", "W"),
+  c("C", "C", "W")
+)
+
+# Storage for Time Series and Output
+ts_list <- list()     # Stores time series objects
+output_text <- list() # Stores text output for reporting
+
+# Category Conversion and Verification Loop
+for (i in seq_along(categories)) {
+  category <- categories[[i]]
+
+  # Filtering and Aggregation
+  filtered_data <- ts_data %>%
+    filter(Category1 == category[1], Category2 == category[2], Category3 == category[3],
+           Date >= start_date, Date <= end_date) %>%
+    group_by(Date) %>%
+    summarise(Value = sum(Value)) %>%   # Ensure 'sum' is your intended aggregation 
+    arrange(Date) 
+
+  # Time Series Creation 
+  ts_object <- ts(filtered_data$Value, 
+                  start = c(year(min(filtered_data$Date)), month(min(filtered_data$Date))),
+                  frequency = frequency)
+
+  # Store Time Series with Descriptive Name
+  ts_list_name <- paste(category, collapse = "_")
+  ts_list[[ts_list_name]] <- ts_object
+
+  # Data Consistency Checks (with formatted output)
+  output_text[[ts_list_name]] <- capture.output({
+    formatted_start <- format(min(filtered_data$Date), "%Y-%m-%d")
+    formatted_end <- format(max(filtered_data$Date), "%Y-%m-%d")
+
+    cat("\n---------------------------------------------\n")
+    cat("Category combination: ", ts_list_name, "\n\n")
+    cat("Summary for this category:\n")
+    cat("- Date range in data: [", formatted_start, " - ", formatted_end, "]\n")
+    cat("- Time series length: ", length(ts_object), "\n")
+    cat("- Expected periods (unique dates): ", length(unique(filtered_data$Date)), "\n")
+    cat("- Data points used: ", nrow(filtered_data), "\n")
+    cat("---------------------------------------------\n")
+  })
+}
+
+# Display Verification Output 
+for (name in names(output_text)) {
+  cat("\nOutput for category combination:", name, "\n")
+  cat(output_text[[name]], sep="\n")
+}
+
+```
+
+## Plot - Original Time Series
+
+```{r '4 - Plot - Original Time Series', echo=TRUE}
+# Assumptions
+# - 'start_date' has been defined previously 
+# - 'ts_list' contains a list of your time series objects
+
+# Store Plots for Later Use 
+time_series_plots_list <- list() 
+
+# Create and Display Plots 
+for (name in names(ts_list)) {
+  ts_object <- ts_list[[name]] 
+
+  # Generate Date Sequence for Consistent Plotting 
+  date_seq <- seq(start_date, by = "month", length.out = length(ts_object))
+
+  # Create ggplot2 Time Series Plot
+  plot <- ggplot(data.frame(Time = date_seq, Value = as.numeric(ts_object)), aes(x = Time, y = Value)) +
+    geom_line() +
+    labs(title = paste("Time Series for:", name), 
+         x = "Time", 
+         y = "Value") +  
+    theme_minimal(base_size = 14) + 
+    theme(plot.title = element_text(size = 20, hjust = 0.5, face = "bold"), 
+          axis.text.x = element_text(angle = 45, hjust = 1),  
+          axis.title.x = element_text(size = 14, face = "bold"), 
+          axis.title.y = element_text(size = 14, face = "bold")) 
+
+  # Store and Print Plot 
+  time_series_plots_list[[name]] <- plot 
+  print(plot) 
+}
+
+```
+
+## Plot - STL Decomposition
+
+```{r '5 - Plot - STL Decomposition', echo=TRUE, fig.cap='STL Decomposition of Job Openings. The plot displays four panels in order: Observed Data', fig.height=10, fig.width=12}
+# Store STL Plots for Later Use
+stl_plots_list <- list() 
+
+# STL Decomposition and Plotting
+for (name in names(ts_list)) {
+  ts_object <- ts_list[[name]] 
+
+  # Decompose Time Series (STL)
+  ts_stl <- stl(ts_object, s.window = "periodic", robust = TRUE) 
+
+  # Create STL Plot with Enhanced Formatting  
+  stl_plot <- autoplot(ts_stl) +
+    labs(title = paste("STL Decomposition for:", name), 
+         x = "Time", 
+         y = "Value") +  
+    theme_minimal(base_size = 14) + 
+    theme(plot.title = element_text(size = 20, hjust = 0.5, face = "bold"), 
+          axis.text.x = element_text(angle = 45, hjust = 1),  
+          axis.title.x = element_text(size = 14, face = "bold"), 
+          axis.title.y = element_text(size = 14, face = "bold"), 
+          strip.text.x = element_text(size = 16, face = "bold"), 
+          strip.background = element_rect(fill = "lightblue", colour = "deepskyblue", size = 1)) 
+
+  # Store and Print
+  stl_plots_list[[name]] <- stl_plot  
+  print(stl_plot) 
+}
+
+```
+
+## Check Seasonality Levels
+
+```{r '6 - Check Seasonality Levels', echo=TRUE}
+
+# Store Seasonality Assessment Results
+seasonality_output <- list()
+
+# Analyze Seasonality of Time Series 
+for (name in names(ts_list)) {
+  ts_object <- ts_list[[name]]
+
+  # Decompose Time Series (STL)
+  stl_object <- stl(ts_object, s.window = "periodic") 
+
+  # Measure Seasonality Strength (MAD)
+  seasonal_comp <- stl_object$time.series[, "seasonal"] 
+  seasonal_mad <- mean(abs(seasonal_comp - mean(seasonal_comp))) 
+
+  # Interpret Seasonality Strength  
+  seasonality_assessment <- if (seasonal_mad > 0.2) {
+    "The time series exhibits significant seasonality.\n" 
+  } else if (seasonal_mad > 0.1) {
+    "The time series exhibits some seasonality.\n"
+  } else {
+    "The time series likely does not exhibit significant seasonality.\n" 
+  }
+
+  # Store Seasonality Analysis Report
+  seasonality_output[[name]] <- capture.output({
+    cat("\n---------------------------------------------\n")
+    cat("Time Series Analysis: ", name, "\n\n")
+    cat("Seasonality Assessment Summary:\n")
+    cat(sprintf("Mean Absolute Deviation (MAD) of the seasonal component: %.2f\n", seasonal_mad))
+    cat(seasonality_assessment)
+    cat("---------------------------------------------\n")
+  })
+}
+
+# Display Assessment Reports
+for (name in names(seasonality_output)) {
+  cat("\nOutput for Time Series:", name, "\n")
+  cat(seasonality_output[[name]], sep="\n") 
+}
+
+```
+
+## Differencing Tests
+
+```{r '7 - Differencing Tests', echo=TRUE}
+# Store Results for Later 
+differencing_output <- list()
+differenced_ts_list <- list()
+
+# Differencing Analysis Loop
+for (name in names(ts_list)) {
+  # Start with a Copy of Original Data
+  current_data <- ts_list[[name]] 
+  max_iterations <- 5  # Set a maximum for differencing attempts
+  iterations <- 0
+  seasonal_period <- frequency
+
+  # Store Differencing Test Report
+  differencing_output[[name]] <- capture.output({
+    cat("\n---------------------------------------------\n")
+    cat("Performing Differencing Tests for: ", name, "\n\n")
+
+    # Seasonal Differencing (if applicable)
+    if (seasonal_period > 1) {
+      current_data <- diff(current_data, lag = seasonal_period) 
+      iterations <- iterations + 1
+      cat("Seasonal differencing applied with lag =", seasonal_period, "\n")
+
+      # Update ts object after seasonal differencing
+      current_data <- ts(current_data, start = start(ts_list[[name]]), frequency = frequency) 
+    }
+
+    # Iterative Regular Differencing
+    while (iterations < max_iterations) {
+      adf_result <- adf.test(current_data, alternative = "stationary") 
+
+      # Stop if stationary 
+      if (adf_result$p.value < 0.05) {
+        break
+      } 
+
+      # Otherwise, difference and update
+      current_data <- diff(current_data) 
+      iterations <- iterations + 1
+      cat(sprintf("After differencing %d times, p-value is %.5f \n", iterations, adf_result$p.value))
+
+      #  Update ts object after differencing
+      current_data <- ts(current_data, start = start(ts_list[[name]]), frequency = frequency) 
+    }
+
+    # Final Stationarity Assessment 
+    if (adf_result$p.value < 0.05) {
+      cat(sprintf("Time Series %s appears stationary after %d differencing operations.\n", name, iterations))
+    } else {
+      cat(sprintf("Time Series %s is still non-stationary after maximum allowed differencing operations.\n", name))
+    }
+    cat("\n---------------------------------------------\n")
+  })
+
+  # Store Final Differenced Data  
+  differenced_ts_list[[name]] <- current_data 
+}
+
+# Display Test Reports
+for (name in names(differencing_output)) {
+  cat("\nDifferencing Test Output for Time Series:", name, "\n")
+  cat(differencing_output[[name]], sep="\n") 
+}
+
+```
+
+## Plot - Differencing
+
+```{r '8 - Plot - Differencing', echo=TRUE, fig.cap='Differencing Test & Visualization. This plot illustrates the final state of the time series after applying the necessary differencing operations', fig.height=8, fig.width=10}
+# Store Plots 
+differencing_plots_list <- list()
+
+# Differencing and Plotting Loop
+for (name in names(ts_list)) {
+  current_data <- ts_list[[name]]
+  max_iterations <- 5  
+  iterations <- 0
+  seasonal_period <- frequency # Assuming 'frequency' is defined earlier 
+
+  # Seasonal Differencing (if needed)
+  if (seasonal_period > 1) {
+    current_data <- diff(current_data, lag = seasonal_period)
+    iterations <- 1 
+  }
+
+  # Iterative Regular Differencing 
+  while (iterations < max_iterations) {
+    adf_result <- adf.test(current_data, alternative = "stationary") 
+    if (adf_result$p.value < 0.05) { 
+      break 
+    } 
+    current_data <- diff(current_data) 
+    iterations <- iterations + 1 
+  }
+
+  # Prepare for Plotting (adjusting for differencing)
+  date_seq <- seq(start_date, by = "month", length.out = length(current_data)) 
+
+  # Create and Store Differenced Time Series Plot
+  plot <- ggplot(data.frame(Date = date_seq, Value = as.numeric(current_data)), aes(x = Date, y = Value)) +
+    geom_line() +
+    labs(title = paste("Time Series after", iterations, "Differencing(s) for:", name), 
+         x = "Date", 
+         y = "Value") +  
+    theme_minimal() + 
+    theme(plot.title = element_text(hjust = 0.5)) 
+
+  differencing_plots_list[[name]] <- plot 
+  print(plot) 
+}
+```
+
+## Augmented Dickey-Fuller test
+
+```{r '9 - Augmented Dickey-Fuller test', echo=TRUE}
+# Assuming ts_list contains your time series objects
+for (name in names(ts_list)) {
+  cat("\n---------------------------------------------\n")
+  cat(sprintf("Augmented Dickey-Fuller Test for: %s\n", name)) 
+
+  current_data <- ts_list[[name]] 
+
+  # Perform the ADF Test
+  adf_result <- adf.test(current_data, alternative = "stationary") 
+
+  # Explain Results Clearly
+  cat(sprintf("ADF Test Results for %s:\n", name))
+  cat(sprintf("Test Statistic: %.4f, P-value: %.4f\n", adf_result$statistic, adf_result$p.value))
+  cat(sprintf("Critical Values: %.4f (1%%), %.4f (5%%), %.4f (10%%)\n", adf_result$critical[["1%"]], adf_result$critical[["5%"]], adf_result$critical[["10%"]]))
+
+  # Interpret the Results (with guidance)
+  if (adf_result$p.value < 0.05) {
+    cat("Conclusion: The time series appears to be stationary.\n")  
+  } else {
+    cat("Conclusion: The time series may still be non-stationary. Consider differencing to achieve stationarity.\n") 
+  }
+  cat("\n---------------------------------------------\n")
+}
+
+```
+
+## Box-Ljung Test
+
+```{r '10 - Box-Ljung Test', echo=TRUE}
+# Loop through time series in your list
+for (name in names(ts_list)) {
+  cat(sprintf("Box-Ljung Test for: %s\n", name)) 
+
+  # Extract Time Series Data
+  current_data <- ts_list[[name]] 
+
+  # Estimate Time Series Frequency (with check)
+  numeric_frequency_estimate <- frequency(current_data) 
+  if (is.na(numeric_frequency_estimate)) {
+    stop("Numeric frequency estimation failed. Please check the calculations.") 
+  }
+
+  # Determine Lag for Test (adjustable rule)
+  lag_for_test <- max(1, min(20, numeric_frequency_estimate)) # Adjust rule if needed
+  
+  # Perform Box-Ljung Test (check residuals for autocorrelation)
+  box_test_result <- Box.test(current_data, lag = lag_for_test, type = "Ljung-Box") 
+
+  # Display Test Results
+  print(box_test_result) 
+
+  cat("\n---------------------------------------------\n") 
+}
+
+```
+
+## Plots for Model Selection
+
+```{r '11 - Plots for Model Selection', echo=TRUE, fig.cap='Visual Diagnostics for Model Selection: This figure compares the original time series, its differenced version (for stationarity), and the ACF and PACF plots of the differenced series.', fig.height=8, fig.width=10}
+# Function to generate ACF and PACF plots for differenced data
+generate_acf_pacf_plots <- function(ts_data, name) {
+  # Generate ACF plot
+  acf_plot <- forecast::Acf(ts_data, plot = FALSE)
+  # Generate PACF plot
+  pacf_plot <- forecast::Pacf(ts_data, plot = FALSE)
+  
+  # Convert to ggplot objects using autoplot
+  acf_ggplot <- ggplot2::autoplot(acf_plot) +
+    ggtitle(paste("ACF for:", name)) +
+    theme_minimal()
+  
+  pacf_ggplot <- ggplot2::autoplot(pacf_plot) +
+    ggtitle(paste("PACF for:", name)) +
+    theme_minimal()
+  
+  return(list(acf_plot = acf_ggplot, pacf_plot = pacf_ggplot)) 
+}
+
+# Assuming 'differenced_ts_list' contains the final differenced data,
+# Iterate over each time series to generate and arrange plots
+for (name in names(differenced_ts_list)) {
+  differenced_data <- differenced_ts_list[[name]]
+
+  # Generate ACF and PACF plots
+  acf_pacf_plots <- generate_acf_pacf_plots(differenced_data, name)
+
+  # Arrange plots for visual comparison
+  gridExtra::grid.arrange(
+    acf_pacf_plots$acf_plot, 
+    acf_pacf_plots$pacf_plot, 
+    ncol = 2, 
+    top = paste("Visual Diagnostics for Model Selection:", name)
+  )
+}
+
+```
+
+## Determination of Model Selection
+
+### A, A, M
+
+#### Autocorrelation Function (ACF)
+
+The ACF plot for the A,A,M time series shows statistically significant
+correlations extending out to around 12 lags. There are spikes at lags
+1-3, 12, 13, and 24. The periodic spikes indicate potential seasonality
+at a 12 month period. The earlier spikes suggests there may be a moving
+average component or a short-memory autoregressive component.
+
+#### Partial Autocorrelation Function (PACF)
+
+The PACF plot cuts off decisively after lag 1 and then mostly stays
+between the significance bands, swinging around 0, characteristic of an
+AR(1) process. There is also a smaller spike at lag 12, providing
+further evidence of the 12-month seasonal cycle. The sharp cutoff
+supports that the ACF spikes are likely from a moving average process
+rather than higher order AR.
+
+#### Differencing
+
+The Augmented Dickey-Fuller test showed this time series was
+non-stationary. After 1 seasonal difference and 3 consecutive regular
+differences, stationarity was achieved. This tells us:
+
+-   There was a non-stationary long-term trend that was removed by the
+    regular differencing, supporting an AR and/or MA component(s).
+-   A seasonal difference was needed, confirming the 12-month seasonal
+    pattern.
+
+#### Seasonality
+
+The seasonality diagnostic gave a very high Mean Absolute Deviation
+(MAD) value of around 3.9 million for the seasonal component. This
+supports the ACF/PACF indications that there is a strong seasonal effect
+at 12 months.
+
+#### Final Model Selection
+
+Based on putting all the above analyses together:
+
+-   The PACF cutoff supports an AR(1) process\
+-   The need for 3 regular differences suggests including an MA(3)
+-   The seasonal PACF spike and seasonality check indicates adding a
+    SAR(1) at 12 months
+-   No support found for seasonal MA, so SMA is left at 0
+
+Therefore, I would start with a **SARIMA(1,1,3)(1,1,0)[12]** model to
+forecast this time series.
+
+### B, C, W
+
+#### Autocorrelation Function (ACF)
+
+The ACF plot for the B,C,W time series shows statistically significant
+correlations extending out to around lags 12-15. There are additional
+spikes at lags 1-3. The periodic seasonal spikes indicate a potential
+12-month seasonal cycle. The earlier spikes suggests there may be a
+moving average component or a short-memory autoregressive component.
+
+#### Partial Autocorrelation Function (PACF)
+
+The PACF plot cuts off decisively after lag 1 and then oscillates around
+zero between the significance bands, characteristic of an AR(1) process.
+There is also a smaller spike at lag 12, providing further evidence of
+the 12-month seasonal pattern. The sharp cutoff supports that the ACF
+spikes are likely from an MA process rather than a higher order AR
+model.
+
+#### Differencing
+
+The Augmented Dickey-Fuller test showed this time series was
+non-stationary initially. After applying 1 seasonal difference and 3
+regular differences, stationarity was achieved. This tells us:
+
+-   There was a non-stationary trend that was eliminated by the regular
+    differencing, providing support for an AR and/or MA component(s).
+-   A seasonal difference was required, confirming the seasonal behavior
+    at 12 months.
+
+#### Seasonality
+
+The seasonality check gave a high Mean Absolute Deviation (MAD) of
+around 2.3 million for the seasonal component. This confirms the
+hypotheses of seasonality at the annual periodicity.
+
+#### Final Model Selection
+
+Based on the above:
+
+-   The PACF supports including an AR(1) term
+-   The need for 3 regular differences indicates adding an MA(3)
+-   The seasonal ACF/PACF points to adding a SAR(1) at 12 months\
+-   No evidence found for a seasonal MA, leaving SMA at 0
+
+Therefore, I would start with fitting a **SARIMA(1,1,3)(1,1,0)[12]**
+model to this time series.
+
+### C, C, W
+
+#### Autocorrelation Function (ACF)
+
+The ACF plot for the C,C,W series shows statistically significant
+correlations extending out to lags around 12-15. There are additional
+smaller spikes at lags 1-5. The periodic seasonal spikes indicate a
+potential seasonal cycle at 12 months. The earlier spikes suggest there
+could be a higher order autoregressive process.
+
+#### Partial Autocorrelation Function (PACF)
+
+The PACF plot shows a slow decay in the correlations without clearly
+cutting off. This suggests the ACF spikes are from a higher order AR
+rather than an MA process. There is also a spike at lag 12 relating to
+the seasonal pattern.
+
+#### Differencing
+
+The Augmented Dickey-Fuller test showed this series was non-stationary
+initially. After applying 1 seasonal difference and 2 regular
+differences, stationarity was achieved. This tells us:
+
+-   A non-stationary trend was removed by regular differencing,
+    supporting an AR/MA component(s).\
+-   The seasonal differencing confirms the 12 month seasonal cycle.
+
+#### Seasonality
+
+The seasonality check gave a high Mean Absolute Deviation (MAD) of 2.6
+million for the seasonal component, pointing to a strong seasonal
+effect.
+
+#### Final Model Selection
+
+Based on the analyses:
+
+-   The slowly decaying PACF indicates an AR(2) term
+-   2 regular differences indicates adding an MA(2)
+-   The ACF and seasonal PACF spikes points to a SAR(1)[12]
+-   No support found for seasonal MA, leaving SMA at 0
+
+Therefore, I would start with fitting a **SARIMA(2,1,2)(1,1,0)[12]** for
+this time series.
+
+# Forecasting
+
+## Reminder of What Variables for Forecasting?
+
+(Code and output hidden; see .rmd for code)
+
+```{r '12 - All Variables', include=FALSE}
+# Function to get the type of a variable
+get_var_type <- function(var_name) {
+  var_type <- class(get(var_name))
+  if (length(var_type) > 1) { 
+    var_type <- paste(var_type, collapse=", ")
+  }
+  return(var_type)
+}
+
+# Function to provide details of a time series object
+summarize_ts_object <- function(ts_obj) {
+  cat(paste0("**Time Series Summary:**\n"))
+  cat(paste0("- Class: ", class(ts_obj), "\n"))
+  cat(paste0("- Start: ", start(ts_obj), "\n"))
+  cat(paste0("- End: ", end(ts_obj), "\n"))
+  cat(paste0("- Frequency: ", frequency(ts_obj), "\n"))  
+}
+
+# Retrieve all variable names
+all_vars <- ls()
+
+# Get types for all variables
+var_types <- sapply(all_vars, get_var_type)
+
+# Print variables sorted by type
+cat("Variables sorted by type:\n")
+for (var in all_vars) {
+  cat(var, ":", var_types[var], "\n")  
+
+  # If the object is a time series, print additional details
+  if (var_types[var] == "ts") {
+    summarize_ts_object(get(var)) 
+  }
+}
+
+# For variables that are lists, print their contents
+cat("\nContents of list variables:\n")
+for (var in all_vars) {
+  if (var_types[var] == "list") {
+    cat("\nContents of", var, ":\n")
+    list_contents <- get(var)
+    if (length(list_contents) > 0) {
+      for (item in names(list_contents)) {
+        cat(item, "\n")
+      }
+    } else {
+      cat("Empty list\n")
+    }
+  }
+}
+
+```
+
+```{r '13 - Detailed Look at differenced_ts_list', eval=FALSE, include=FALSE}
+# Assuming differenced_ts_list is already defined
+names_list <- names(differenced_ts_list)
+
+# Loop for Detailed Analysis 
+for (name in names_list) {
+  cat("Details for:", name, "\n")
+  ts_data <- differenced_ts_list[[name]]
+
+  # Basic Summary Statistics
+  summary(ts_data)  # Provides min, max, quartiles, etc.
+
+  # Seasonality Check 
+  print(seasonaldummy(ts_data)) # Outputs seasonal coefficients if seasonality is likely
+
+  # Visualizations
+  plot(ts_data, main=paste("Time Series Plot of", name)) # Plot the differenced time series
+  Acf(ts_data, main=paste("ACF of", name))  # Autocorrelation Function plot
+  Pacf(ts_data, main=paste("PACF of", name)) # Partial Autocorrelation Function plot
+
+  cat("\n") # Separator for clarity between time series analyses
+} 
+
+```
+
+## Forecasting Plots and Prints
+
+```{r '14 - Forecasting Plots and Prints', echo=FALSE}
+# Assuming 'differenced_ts_list' is defined
+
+# Function for SARIMA Model Fitting, Forecasting, and Visualization
+fit_sarima_and_forecast <- function(ts_data, order, seasonal_order, h) {
+  # Fit SARIMA Model (with differencing and seasonal components)
+  fit <- auto.arima(ts_data, seasonal = TRUE, D = 1, d = 1, 
+                    max.p = order[1], max.q = order[2], max.P = seasonal_order[1], max.Q = seasonal_order[2], 
+                    start.p = order[1], start.q = order[2], start.P = seasonal_order[1], start.Q = seasonal_order[2],
+                    stepwise = FALSE, approximation = FALSE) # Tunable parameters
+
+  # Generate Forecast 
+  fcast <- forecast(fit, h = h) 
+
+  # Create Forecast Plot with Informative Labels
+  plot(fcast, main = paste(names(ts_data), "Forecast"), 
+       ylab = "USD", xlab = "Year") 
+  legend("topleft", legend = c("Forecast", "80% CI", "95% CI"),
+         col = c("black", "grey30", "grey60"), lty = 1, bty = "n") 
+
+  # Print Detailed SARIMA Model Summary 
+  print(summary(fit)) 
+
+  return(list(fit = fit, forecast = fcast)) 
+}
+
+# Apply SARIMA and Generate Forecasts (adjust orders as needed)
+results_aam <- fit_sarima_and_forecast(differenced_ts_list$A_A_M, order = c(1, 1, 3), seasonal_order = c(1, 1, 0), h = 12) 
+results_bcw <- fit_sarima_and_forecast(differenced_ts_list$B_C_W, order = c(1, 1, 3), seasonal_order = c(1, 1, 0), h = 12) 
+results_ccw <- fit_sarima_and_forecast(differenced_ts_list$C_C_W, order = c(2, 1, 2), seasonal_order = c(1, 1, 0), h = 12)
+
+```
+
+# Summary of Assignment
+
+## Stats/Forecasting Summary
+
+### A,A,M Series
+
+-   **Model:** The time series was forecasted using a
+    SARIMA(1,1,3)(1,1,0)[12] model.
+-   **Stationarity:** The Augmented Dickey-Fuller test indicated
+    stationarity after 1 seasonal difference and 3 regular differences.
+-   **Seasonality:** A very high Mean Absolute Deviation (MAD) of around
+    3.9 million for the seasonal component was observed, suggesting
+    significant seasonality at 12 months.
+-   **Error Metrics:** The model exhibited high prediction errors on the
+    training set with an RMSE of 2,505,690 and MAPE of 323.00%,
+    indicating potential model inadequacy in capturing the data's
+    patterns.
+
+### B,C,W Series
+
+-   **Model:** A SARIMA(1,1,3)(1,1,0)[12] model was used for
+    forecasting.
+-   **Stationarity:** After 1 seasonal difference and 3 regular
+    differences, the series was deemed stationary, although one of the
+    differencing p-values was marginally above 0.05, hinting at possible
+    residual non-stationarity.
+-   **Seasonality:** The series exhibited a high MAD of around 2.3
+    million for the seasonal component, confirming annual seasonality.
+-   **Error Metrics:** The RMSE was 1,549,353 and MAPE was 77.38%, which
+    are lower than the A,A,M series but still indicate a substantial
+    prediction error.
+
+### C,C,W Series
+
+-   **Model:** Forecasting was conducted with a SARIMA(2,1,2)(1,1,0)[12]
+    model.
+-   **Stationarity:** The series achieved stationarity after 1 seasonal
+    difference and 2 regular differences, as per the Augmented
+    Dickey-Fuller test.
+-   **Seasonality:** A high MAD for the seasonal component of 2.6
+    million was observed, pointing to a strong seasonal effect.
+-   **Error Metrics:** The model reported an RMSE of 730,871 and MAPE of
+    226.98%, suggesting a better fit than the A,A,M series but still
+    relatively high errors.
+
+### General Summary
+
+The forecasting models for all three time series indicated high
+prediction errors on the training data, which suggests that the models
+may not be capturing the underlying patterns effectively. The
+significant seasonality detected in all series is properly addressed by
+the models, yet the high error metrics imply that further refinement of
+the models, possibly through parameter tuning or the inclusion of
+additional explanatory variables, could improve forecast accuracy. The
+findings call for a cautious approach to relying on these forecasts
+without further model improvements and validation against unseen data.
+
+## For Future Improvement
+
+The time series analysis conducted on the A_A_M, B_C_W, and C_C_W series
+offered valuable insights into the underlying patterns and potential for
+forecasting. However, there are several avenues for improvement that
+could enhance the reliability and accuracy of future models:
+
+1.  **Model Optimization**: While the SARIMA models provided a starting
+    point for analysis, further refinement is necessary. The high RMSE
+    and MAPE values indicate that the models may not be capturing the
+    underlying process adequately. More sophisticated model selection
+    techniques or additional explanatory variables could improve
+    performance.
+
+2.  **Data Wrangling Efficiency**: Given time constraints, utilizing
+    `auto.arima` can streamline the model selection process after
+    initial data wrangling. This function can automate the
+    identification of optimal model parameters, saving valuable time and
+    computational resources.
+
+3.  **Time Series Duration**: The current dataset spans four years,
+    which may not capture longer-term cyclical behavior or structural
+    changes in the data. Time series analysis often benefits from longer
+    periods to discern between random fluctuations and true patterns.
+    Future studies should consider extending the timeframe if data
+    availability allows.
+
+4.  **Additional Data**: Incorporating more granular data or external
+    variables could help to explain some of the variance not accounted
+    for by the time series models alone. Economic indicators, market
+    trends, or categorical events could provide further context for the
+    fluctuations observed in the series.
+
+5.  **Model Diagnostics**: Post-modeling diagnostics play a critical
+    role in validating the assumptions of the time series models. Checks
+    for autocorrelation, non-normality, and heteroscedasticity in the
+    residuals can signal the need for model adjustments or additional
+    differencing.
+
+6.  **Forecasting Evaluation**: The accuracy of forecasts should be
+    evaluated against a holdout sample or through time series
+    cross-validation to provide a more robust measure of the model's
+    predictive capabilities.
+
+7.  **Seasonality Adjustments**: The significant seasonality indicated
+    by the Mean Absolute Deviation (MAD) in the series underscores the
+    need to refine how seasonal effects are accounted for, possibly
+    through more complex seasonal models or transformation techniques.
+
+8.  **Training Data Concerns**: The high training errors observed
+    suggest the models may not generalize well to unseen data. Future
+    models should focus on improving the fit on the training data
+    without overfitting, possibly through regularization techniques or
+    model averaging.
+
+9.  **Software and Tools**: Upgrading to more advanced statistical
+    software or leveraging machine learning tools may offer better
+    functionality for modeling complex time series data and automating
+    parts of the analytical process.
+
+10. **Collaborative Efforts**: Time series forecasting can benefit from
+    collaborative efforts, bringing together domain experts and data
+    scientists to ensure that models are not only statistically sound
+    but also grounded in real-world phenomena.
+
+By addressing these areas, the predictive power and reliability of time
+series models used in future analyses can be significantly improved,
+leading to more accurate forecasts and better-informed decision-making.

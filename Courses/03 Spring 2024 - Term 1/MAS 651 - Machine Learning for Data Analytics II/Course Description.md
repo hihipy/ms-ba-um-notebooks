@@ -1,0 +1,4 @@
+MAS 651. Machine Learning for Data Analytics II. 2 Credit Hours.
+
+This course aims to introduce recent advanced analytical techniques developed from the Statistical, Data Mining and Machine Learning communities, These techniques have become widely used by Business Analysts and Data Scientists to address complex decision-making problems in numerous industries. This course is designed to provide students with a practical understanding of some of the most powerful Machine Learning methods used by today's Data Analysts. Specifically, students will become familiar with supervised and unsupervised learning and apply these techniques to the numerous data-driven applications in predictive analytics.
+Prerequisite: MAS 648. with a Grade B or Higher.
