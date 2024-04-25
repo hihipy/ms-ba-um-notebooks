@@ -1,0 +1,1245 @@
+---
+title: "Marketing Group Research Project"
+author: 
+  - Jiaqian Li (Serena)
+  - Yan Shen  
+  - Xiaoxi Yuan
+  - Ziyang Lu (Orlando)
+  - Philip Bachas-Daunert
+  - Dylan Mason
+output:
+  html_document: 
+    theme: readable # Easy-to-read theme for HTML output.
+    toc: true # Table of contents enabled for easy navigation.
+    toc_float:
+      collapsed: true # Table of contents starts collapsed.
+      smooth_scroll: true # Smooth scrolling through the document.
+    highlight: tango # Syntax highlighting style set to 'tango'.
+    fig_caption: true # Figure captions enabled.
+    df_print: paged # Data frames printed in a 'kabble' format for large datasets.
+    number_sections: true # Sections of the document will be numbered.
+    self_contained: true # Embed all dependencies in the HTML file for portability.
+    mathjax: "default" # MathJax options for better rendering of mathematical expressions written in LaTeX.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+
+# Data manipulation and transformation
+library(tidyverse)
+library(reshape2)
+
+# Data visualization
+library(ggplot2)
+library(plotly)
+library(ggrepel)
+library(viridis)
+library(scales)
+
+# Statistical analysis
+library(psych)
+
+# Reporting and table formatting
+library(knitr)
+library(kableExtra)
+```
+
+```{r df, include=FALSE}
+df <- read.csv("eCommerce.csv")
+```
+
+# ***Big Picture***
+
+## **What is The Business Problem?**
+
+-   Identifying and targeting high-value customer segments to maximize
+    customer lifetime value.
+
+-   Developing personalized marketing strategies to increase customer
+    engagement and loyalty.
+
+-   Optimizing marketing spend and resource allocation based on customer
+    segment characteristics.
+
+-   Improving customer retention and reducing churn rates through
+    targeted retention efforts.
+
+-   Enhancing overall business profitability by focusing on the most
+    valuable customer segments.
+
+## **Motivation?**
+
+-   In the highly competitive e-commerce landscape, a one-size-fits-all
+    approach is no longer effective for customer engagement and
+    retention.
+
+-   Understanding individual customer behavior and preferences is
+    crucial for developing targeted marketing strategies that resonate
+    with each segment.
+
+-   Personalized communications, product recommendations, and promotions
+    can significantly improve customer satisfaction, loyalty, and
+    lifetime value.
+
+-   The shift in consumer behavior post-COVID has accelerated the need
+    for businesses to adopt data-driven, customer-centric strategies to
+    remain competitive.
+
+-   Effective customer segmentation and targeted marketing efforts can
+    lead to higher conversion rates, increased average order value, and
+    improved overall business performance.
+
+# ***Defining the Specific Business Challenge***
+
+The specific business challenge is to leverage customer transaction data
+to identify and characterize distinct customer segments based on their
+purchasing behavior, and to develop targeted marketing strategies that
+maximize customer engagement, retention, and profitability.
+
+## **Key Objectives**
+
+1.  Analyze customer transaction data to identify meaningful customer
+    segments using the RFM (Recency, Frequency, Monetary) framework.
+
+2.  Develop a deep understanding of each segment's characteristics,
+    preferences, and purchasing patterns.
+
+3.  Create personalized marketing strategies tailored to each segment,
+    focusing on cross-selling, upselling, and retention efforts.
+
+4.  Optimize marketing spend and resource allocation based on the value
+    and potential of each customer segment.
+
+5.  Monitor and assess the effectiveness of targeted marketing
+    campaigns, making data-driven decisions to continually improve
+    customer engagement and business performance.
+
+By addressing this specific business challenge, the e-commerce company
+aims to enhance customer loyalty, increase customer lifetime value, and
+ultimately drive business growth and profitability in the competitive
+online marketplace.
+
+# ***Exploring the Dataset***
+
+## **Dataset Description**
+
+-   **Source**
+
+    -   [Kaggle: Marketing Insights for E-Commerce
+        Company](https://www.kaggle.com/datasets/rishikumarrajvansh/marketing-insights-for-e-commerce-company)
+
+-   **Description**
+
+    -   Marketing Insights for E-Commerce Company.
+    -   Transaction data has been provided for the period of 1/1/2019 to
+        12/31/2019.
+
+-   **Original**
+
+    -   Online_Sales.csv
+
+    -   CustomersData.csv
+
+    -   Marketing_Spend.csv
+
+    -   Discount_Coupon.csv
+
+    -   Tax_amount.csv
+
+Transformed Into...
+
+-   **eCommerce.csv**
+
+    -   N = 52,924
+
+    -   15 Variables
+
+    -   No Missing Values
+
+## **Key Variables in the Dataset**
+
+-   **CustomerID**
+
+    -   Unique identifier for each customer
+
+-   **Transaction_ID**
+
+    -   Unique identifier for each transaction
+
+-   **Transaction_Date**
+
+    -   Date of the transaction
+
+-   **Product_SKU**
+
+    -   Stock Keeping Unit for product identification
+
+-   **Product_Description**
+
+    -   Description of the product
+
+-   **Product_Category**
+
+    -   Category of the product
+
+-   **Quantity**
+
+    -   Number of items purchased in the transaction
+
+-   **Avg_Price**
+
+    -   Average price of the items
+
+-   **Delivery_Charges**
+
+    -   Additional charges for product delivery
+
+-   **Coupon_Status**
+
+    -   Indicates if a coupon was used
+
+-   **Month**
+
+    -   Transaction month
+
+-   **Coupon_Code**
+
+    -   Code of the coupon used
+
+-   **Discount_pct**
+
+    -   Discount percentage applied
+
+-   **GST**
+
+    -   Goods and Services Tax applied
+
+-   **Invoice**
+
+    -   Total invoice amount after discounts and taxes
+
+# ***Levels of the Dataset***
+
+## **`head(df)` & `tail(df)`**
+
+### `head(df)`
+
+```{r head, echo=FALSE}
+# Show the top rows using head()
+head(df)
+```
+
+### `tail(df)`
+
+```{r tail, echo=FALSE}
+# Display the bottom rows using tail()
+tail(df)
+```
+
+## **`describe(df)`, `str(df)`, & `summary(df)`**
+
+### `describe(df)`
+
+```{r describe, echo=FALSE}
+# Describe the data using the describe function from the psych package
+desc_output <- describe(df)
+
+# Format the numeric columns to disable scientific notation
+formatted_output <- format(desc_output, scientific = FALSE)
+
+# Print the formatted output
+print(formatted_output)
+```
+
+### `str(df)`
+
+```{r str}
+# Show the structure of the DataFrame using base R's str function
+str(df)
+```
+
+### `summary(df)`
+
+```{r describestrsummary}
+# Provide a summary of the data using base R's summary function
+summary(df)
+```
+
+# ***Correlations & Interesting Relationships***
+
+## **Correlations**
+
+### Plots
+
+#### Correlation Matrix
+
+```{r cormatrix, echo=FALSE}
+# Assuming 'df' is your dataframe and you've already selected your columns
+selected_columns <- c(7:9, 13:15)
+cor_matrix <- cor(df[, selected_columns], use = "complete.obs")
+
+# Convert the correlation matrix to a dataframe for plotting
+cor_data <- as.data.frame(cor_matrix)
+cor_data <- cor_data |>
+  rownames_to_column(var = "Variable1") |>
+  pivot_longer(cols = -Variable1,
+               names_to = "Variable2",
+               values_to = "Correlation")
+
+# Filter out the upper triangle of the matrix, including the diagonal
+cor_data <- cor_data |>
+  filter(Variable1 != Variable2) |>  # Remove diagonal
+  filter(Variable2 > Variable1)       # Keep only the bottom half
+
+# Generating the Correlation Matrix interactive plot.
+plot_ly(
+  data = cor_data,
+  x = ~ Variable2,
+  y = ~ Variable1,
+  z = ~ Correlation,
+  type = "heatmap",
+  colors = viridis_pal(option = "turbo")(200),
+  # Using 'turbo' palette
+  zmin = -1,
+  # Set minimum z value
+  zmax = 1,
+  # Set maximum z value
+  text = ~ paste("Correlation: ", format(Correlation, digits = 2)),
+  hoverinfo = "text+x+y"
+) |>
+  layout(
+    title = "Correlation Matrix",
+    xaxis = list(tickangle = 45, tickfont = list(size = 10)),
+    yaxis = list(tickangle = 45, tickfont = list(size = 10)),
+    colorbar = list(title = "Correlation Coefficients"),
+    margin = list(
+      l = 50,
+      r = 50,
+      t = 50,
+      b = 50
+    ),
+    responsive = TRUE
+  )
+```
+
+#### Quantity vs. Invoice Scatterplot
+
+```{r quantityvsinvoiceplot}
+# Create a color scale using the 'turbo' option from the viridis palette
+colors <- viridis_pal(option = "turbo")(200)
+
+# Create a colorscale using the 'turbo' colors
+colorscale <- list(
+  list(0, colors[1]),
+  list(0.25, colors[50]),
+  list(0.5, colors[100]),
+  list(0.75, colors[150]),
+  list(1, colors[200])
+)
+
+# Scatter plot settings
+scatter_theme <- list(
+  plot_bgcolor = "white",
+  paper_bgcolor = "white",
+  titlefont = list(size = 20, color = "black")
+)
+
+# Create the scatter plot for Quantity vs. Invoice
+plot_quantity_invoice <-
+  plot_ly(
+    data = df,
+    x = ~ Quantity,
+    y = ~ Invoice,
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      color = ~ Invoice,
+      colorscale = colorscale,
+      # Use the modified colorscale
+      colorbar = list(title = "Invoice")
+    ),
+    hoverinfo = "x+y"
+  ) |>
+  layout(
+    title = "Quantity vs. Invoice",
+    xaxis = list(
+      title = "Quantity",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    yaxis = list(
+      title = "Invoice",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    margin = list(
+      l = 50,
+      r = 50,
+      t = 50,
+      b = 100 # Increased bottom margin for the equation
+    ),
+    responsive = TRUE
+  )
+
+# Add line of best fit
+model <- lm(Invoice ~ Quantity, data = df)
+intercept <- coef(model)[1]
+slope <- coef(model)[2]
+
+x_range <- range(df$Quantity)
+y_range <- intercept + slope * x_range
+
+plot_quantity_invoice <- plot_quantity_invoice |>
+  add_trace(
+    x = x_range,
+    y = y_range,
+    type = 'scatter',
+    mode = 'lines',
+    line = list(color = "black", width = 2),
+    showlegend = FALSE
+  ) |>
+  layout(annotations = list(
+    list(
+      x = 0.5,
+      # Center the equation horizontally
+      y = -0.2,
+      # Position the equation below the plot
+      text = paste(
+        "Line of Best Fit: Invoice =",
+        round(intercept, 2),
+        "+",
+        round(slope, 2),
+        "* Quantity"
+      ),
+      showarrow = FALSE,
+      xref = "paper",
+      yref = "paper",
+      xanchor = "center",
+      yanchor = "top",
+      font = list(size = 12, color = "black")
+    )
+  ))
+
+# Print the plot
+plot_quantity_invoice
+```
+
+### **Interesting Relationships**
+
+-   As the `Avg_Price` or `Invoice` amount increases, the `GST` (Goods
+    and Services Tax) as a percentage of the total purchase falls.
+
+-   With an increase of `Quantity` comes an increase in total `Invoice`
+    amount and `Delivery_Charges`.
+
+-   The larger the `Invoice` amount, the larger the `Delivery_Charges`.
+
+-   The slope of the linear regression line between `Quantity` and
+    `Invoice` value is 4.37.
+
+# ***Analysis***
+
+## **Methodology**
+
+```{r calculatingRFMcomponents, echo=TRUE}
+# RFM component: Monetary
+# Calculate the total transaction amount for each line item in the dataset.
+# The formula includes the product of quantity and average price, adds the
+# Goods and Services Tax (GST), and also adds any delivery charges associated
+# with the transaction.
+df$amount <-
+  df$Quantity * df$Avg_Price * (1 + df$GST) + df$Delivery_Charges
+
+# Aggregate the total monetary value by each customer. This uses the 'aggregate' function to sum up all the
+# amounts spent per customer, identified by 'CustomerID'.
+# The result is stored in 'rfm.m', which holds the
+# total monetary value for each customer.
+rfm.m <- aggregate(amount ~ CustomerID, data = df, sum)
+
+# RFM component: Recency
+# Identify the latest date in the dataset.
+# This is done by accessing the last row's date from the
+# 'Transaction_Date' column, assuming the data is ordered by date.
+latestdate <-
+  df$Transaction_Date[nrow(df)]  # last date in the dataset
+
+# Calculate the number of days since the latest transaction
+# for each transaction in the dataset.
+# 'difftime' computes the difference in days between the 'latestdate' and each transaction's date.
+df$days_since_latest <-
+  as.integer(difftime(latestdate, df$Transaction_Date, units = "days"))
+
+# Aggregate the minimum days since last transaction by each custome
+# to find out the most recent purchase.
+# This uses 'aggregate' to find the minimum 'days_since_latest' for each 'CustomerID', storing the result in 'rfm.r'.
+rfm.r <- aggregate(days_since_latest ~ CustomerID, data = df, min)
+
+# RFM component: Frequency
+# Calculate the frequency of transactions for each customer. The frequency is determined by counting the
+# unique transaction IDs per customer. This involves using the
+# 'aggregate' function with a custom function
+# that calculates the length of unique transaction IDs.
+rfm.f <- aggregate(
+  Transaction_ID ~ CustomerID,
+  data = df,
+  FUN = function(x)
+    length(unique(x))
+)
+
+# Combine RFM
+# Combine the results from the monetary, recency, and
+# frequency calculations into a single data frame.
+# 'cbind' combines the data frames by columns.
+rfm <- cbind(rfm.m, rfm.r, rfm.f)
+
+# Convert the combined object into a dataframe if it is not already.
+rfm <- as.data.frame(rfm)
+
+# Remove duplicate rows based on all columns, ensuring that each row
+# in 'rfm' is unique.
+rfm <- rfm[!duplicated(as.list(rfm))]
+
+# Rename the columns to more descriptive names reflecting the RFM components.
+names(rfm)[names(rfm) == "Transaction_ID"] <- "frequency"
+names(rfm)[names(rfm) == "amount"] <- "monetary"
+names(rfm)[names(rfm) == "days_since_latest"] <- "recency"
+
+# Remove redundant datasets
+# Clean up the environment by removing temporary data frames
+# used in the calculation process.
+# This helps free up memory and avoids clutter in the workspace.
+rm(rfm.f, rfm.r, rfm.m)
+```
+
+### Histograms
+
+```{r histograms}
+# Create a color scale using the 'turbo' option from the viridis palette
+colors <- viridis_pal(option = "turbo")(100)
+
+# Histogram settings
+hist_theme <- list(
+  plot_bgcolor = "white",
+  paper_bgcolor = "white",
+  titlefont = list(size = 20, color = "black")
+)
+
+# Recency
+p1 <-
+  plot_ly(
+    x = ~ rfm$recency,
+    type = "histogram",
+    name = "Recency",
+    marker = list(color = colors)
+  ) |>
+  layout(title = "Recency Distribution", hist_theme)
+
+# Add plot label
+p1 <- p1 |> layout(annotations = list(
+  list(
+    x = 0.5,
+    y = -0.2,
+    text = "Plot 1",
+    showarrow = FALSE,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    yanchor = "top"
+  )
+))
+
+# Frequency (non-log scale)
+p2 <-
+  plot_ly(
+    x = ~ rfm$frequency,
+    type = "histogram",
+    name = "Frequency",
+    marker = list(color = colors)
+  ) |>
+  layout(title = "Frequency Distribution", hist_theme)
+
+# Add plot label
+p2 <- p2 |> layout(annotations = list(
+  list(
+    x = 0.5,
+    y = -0.2,
+    text = "Plot 2",
+    showarrow = FALSE,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    yanchor = "top"
+  )
+))
+
+# Frequency (log scale)
+p3 <-
+  plot_ly(
+    x = ~ log(rfm$frequency),
+    type = "histogram",
+    name = "Frequency (log scale)",
+    marker = list(color = colors)
+  ) |>
+  layout(title = "Frequency Distribution (log scale)", hist_theme)
+
+# Add plot label
+p3 <- p3 |> layout(annotations = list(
+  list(
+    x = 0.5,
+    y = -0.2,
+    text = "Plot 3",
+    showarrow = FALSE,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    yanchor = "top"
+  )
+))
+
+# Monetary (non-log scale)
+p4 <-
+  plot_ly(
+    x = ~ rfm$monetary,
+    type = "histogram",
+    name = "Monetary",
+    marker = list(color = colors)
+  ) |>
+  layout(title = "Monetary Distribution", hist_theme)
+
+# Add plot label
+p4 <- p4 |> layout(annotations = list(
+  list(
+    x = 0.5,
+    y = -0.2,
+    text = "Plot 4",
+    showarrow = FALSE,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    yanchor = "top"
+  )
+))
+
+# Monetary (log scale)
+p5 <-
+  plot_ly(
+    x = ~ log(rfm$monetary),
+    type = "histogram",
+    name = "Monetary (log scale)",
+    marker = list(color = colors)
+  ) |>
+  layout(title = "Monetary Distribution (log scale)", hist_theme)
+
+# Add plot label
+p5 <- p5 |> layout(annotations = list(
+  list(
+    x = 0.5,
+    y = -0.2,
+    text = "Plot 5",
+    showarrow = FALSE,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    yanchor = "top"
+  )
+))
+
+# Print individual plots
+p1
+p2
+p3
+p4
+p5
+```
+
+### RFM Quintile & Scatterplot
+
+```{r RFMquintilesandscatterplot}
+# Create a color scale using the 'turbo' option from the viridis palette
+# The colorscale needs to be a list of lists for plotly to interpolate between colors
+colors <-
+  viridis::viridis(
+    100,
+    option = "turbo",
+    begin = 0,
+    end = 1,
+    direction = 1
+  )
+colorscale <-
+  lapply(seq(0, 1, length.out = length(colors)), function(x)
+    list(x, colors[which(seq(0, 1, length.out = length(colors)) == x)]))
+
+# Calculate RFM scores
+rfm$R <- ntile(-rfm$recency, 5)
+rfm$F <- ntile(rfm$frequency, 5)
+rfm$M <- ntile(rfm$monetary, 5)
+
+# Create the scatter plot for RFM R vs. Recency
+plot_r_recency <-
+  plot_ly(
+    data = rfm,
+    x = ~ R,
+    y = ~ recency,
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      color = ~ recency,
+      colorscale = colorscale,
+      # use the colorscale list
+      colorbar = list(title = "Recency")
+    ),
+    text = ~ paste("R: ", R, "<br>Recency: ", recency),
+    hoverinfo = "text"
+  ) |>
+  layout(
+    title = "RFM R vs. Recency",
+    xaxis = list(
+      title = "RFM R Score",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    yaxis = list(
+      title = "Recency",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    margin = list(
+      l = 50,
+      r = 50,
+      t = 50,
+      b = 50
+    ),
+    responsive = TRUE
+  )
+
+# Print the plot
+plot_r_recency
+
+correlation <- cor(rfm$R, rfm$recency)
+cat("Correlation between RFM R score and Recency:",
+    round(correlation, 2))
+```
+
+### RFM Segments Table & Heatmaps
+
+```{r rfmtable}
+# Assuming 'rfm' is your data frame with the RFM scores (R, F, M)
+
+# Create the RFM table
+rfm_table <- rfm |>
+  mutate(
+    R_Level = case_when(R %in% 4:5 ~ "High",
+                        R %in% 2:3 ~ "Medium",
+                        TRUE ~ "Low"),
+    F_Level = case_when(F %in% 4:5 ~ "High",
+                        F %in% 2:3 ~ "Medium",
+                        TRUE ~ "Low"),
+    M_Level = case_when(M %in% 4:5 ~ "High",
+                        M %in% 2:3 ~ "Medium",
+                        TRUE ~ "Low")
+  ) |>
+  group_by(R_Level, F_Level, M_Level) |>
+  summarise(
+    Customers = n(),
+    `Average Recency` = round(mean(recency), 4),
+    `Average Frequency` = round(mean(frequency), 4),
+    `Average Monetary` = round(mean(monetary), 4)
+  )
+
+# Format the numeric columns with comma-separated thousands and round to 4 decimal places,
+# except for the "Customers" column, which is formatted as a whole number
+rfm_table_formatted <- rfm_table |>
+  mutate(across(
+    where(is.numeric) &
+      !c(Customers),
+    ~ formatC(
+      .,
+      format = "f",
+      big.mark = ",",
+      digits = 4
+    )
+  ),
+  Customers = formatC(Customers, format = "d", big.mark = ","))
+
+# Display the RFM table
+kable(rfm_table_formatted, caption = "RFM Table", align = "c") |>
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+```{r heatmapsRFMsegments}
+# Use the "turbo" color scale
+colors <- viridis_pal(option = "turbo")(200)
+
+# Assuming 'rfm' is your data frame with the correct columns for RFM analysis.
+# Replace 'R', 'F', 'M' with the correct column names from your 'rfm' data frame if they are different.
+
+# Convert RFM segments into tables for plotting
+rfm_table_RF <- table(rfm$R, rfm$F)
+rfm_table_MF <- table(rfm$M, rfm$F)
+rfm_table_MR <- table(rfm$M, rfm$R)
+
+# Convert contingency tables to data frames and rename columns
+df_rfm_RF <- as.data.frame(rfm_table_RF)
+names(df_rfm_RF) <-
+  c("Recency_Segment", "Frequency_Segment", "Count")
+df_rfm_MF <- as.data.frame(rfm_table_MF)
+names(df_rfm_MF) <-
+  c("Monetary_Segment", "Frequency_Segment", "Count")
+df_rfm_MR <- as.data.frame(rfm_table_MR)
+names(df_rfm_MR) <-
+  c("Monetary_Segment", "Recency_Segment", "Count")
+
+# Calculate total customers and percentage in each segment combination
+total_rf <- sum(df_rfm_RF$Count)
+total_mf <- sum(df_rfm_MF$Count)
+total_mr <- sum(df_rfm_MR$Count)
+
+df_rfm_RF$Percentage <- percent(df_rfm_RF$Count / total_rf)
+df_rfm_MF$Percentage <- percent(df_rfm_MF$Count / total_mf)
+df_rfm_MR$Percentage <- percent(df_rfm_MR$Count / total_mr)
+
+# Create the Heatmap for R and F segments
+plot_rf <-
+  plot_ly(
+    data = df_rfm_RF,
+    x = ~ Frequency_Segment,
+    y = ~ Recency_Segment,
+    z = ~ Count,
+    type = "heatmap",
+    colors = colors,
+    text = ~ paste("Count: ", Count, "<br>Percentage: ", Percentage),
+    hoverinfo = "text+x+y"
+  ) |>
+  layout(
+    title = "Recency and Frequency Segments",
+    xaxis = list(
+      title = "Frequency Segment",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    yaxis = list(
+      title = "Recency Segment",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    colorbar = list(title = "Count"),
+    margin = list(
+      l = 50,
+      r = 50,
+      t = 50,
+      b = 100  # Increased bottom margin for concatenated information
+    ),
+    responsive = TRUE
+  )
+
+# Add total customers and percentage information below the heatmap
+plot_rf <- plot_rf |>
+  layout(annotations = list(
+    list(
+      x = 0.5,
+      y = -0.2,
+      text = paste("Total customers in Recency-Frequency segments:", total_rf),
+      showarrow = FALSE,
+      xref = "paper",
+      yref = "paper",
+      xanchor = "center",
+      yanchor = "top"
+    )
+  ))
+
+# Create the Heatmap for M and F segments
+plot_mf <-
+  plot_ly(
+    data = df_rfm_MF,
+    x = ~ Frequency_Segment,
+    y = ~ Monetary_Segment,
+    z = ~ Count,
+    type = "heatmap",
+    colors = colors,
+    text = ~ paste("Count: ", Count, "<br>Percentage: ", Percentage),
+    hoverinfo = "text+x+y"
+  ) |>
+  layout(
+    title = "Monetary and Frequency Segments",
+    xaxis = list(
+      title = "Frequency Segment",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    yaxis = list(
+      title = "Monetary Segment",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    colorbar = list(title = "Count"),
+    margin = list(
+      l = 50,
+      r = 50,
+      t = 50,
+      b = 100  # Increased bottom margin for concatenated information
+    ),
+    responsive = TRUE
+  )
+
+# Add total customers and percentage information below the heatmap
+plot_mf <- plot_mf |>
+  layout(annotations = list(
+    list(
+      x = 0.5,
+      y = -0.2,
+      text = paste("Total customers in Monetary-Frequency segments:", total_mf),
+      showarrow = FALSE,
+      xref = "paper",
+      yref = "paper",
+      xanchor = "center",
+      yanchor = "top"
+    )
+  ))
+
+# Create the Heatmap for M and R segments
+plot_mr <-
+  plot_ly(
+    data = df_rfm_MR,
+    x = ~ Recency_Segment,
+    y = ~ Monetary_Segment,
+    z = ~ Count,
+    type = "heatmap",
+    colors = colors,
+    text = ~ paste("Count: ", Count, "<br>Percentage: ", Percentage),
+    hoverinfo = "text+x+y"
+  ) |>
+  layout(
+    title = "Monetary and Recency Segments",
+    xaxis = list(
+      title = "Recency Segment",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    yaxis = list(
+      title = "Monetary Segment",
+      tickangle = 45,
+      tickfont = list(size = 10)
+    ),
+    colorbar = list(title = "Count"),
+    margin = list(
+      l = 50,
+      r = 50,
+      t = 50,
+      b = 100  # Increased bottom margin for concatenated information
+    ),
+    responsive = TRUE
+  )
+
+# Add total customers and percentage information below the heatmap
+plot_mr <- plot_mr |>
+  layout(annotations = list(
+    list(
+      x = 0.5,
+      y = -0.2,
+      text = paste("Total customers in Monetary-Recency segments:", total_mr),
+      showarrow = FALSE,
+      xref = "paper",
+      yref = "paper",
+      xanchor = "center",
+      yanchor = "top"
+    )
+  ))
+
+# Print the heatmaps
+plot_rf
+plot_mf
+plot_mr
+```
+
+## **Results**
+
+```{r results, echo=FALSE}
+# Convert R and F columns to factors with desired levels
+rfm$R <-
+  factor(rfm$R,
+         levels = c(1, 2, 3, 4, 5),
+         labels = c("R1", "R2", "R3", "R4", "R5"))
+rfm$F <-
+  factor(rfm$F,
+         levels = c(1, 2, 3, 4, 5),
+         labels = c("F1", "F2", "F3", "F4", "F5"))
+
+# Function to calculate average discount for each group
+calc_avg_discount <- function(group_name, filter_condition) {
+  avg_discount <- df |>
+    mutate(Discount_pct = Discount_pct / 100) |> # Convert percentages to decimal
+    left_join(rfm, by = "CustomerID") |>
+    filter({
+      {
+        filter_condition
+      }
+    }) |>
+    summarise(avg_discount = mean(Discount_pct, na.rm = TRUE)) |>
+    pull(avg_discount)
+  
+  data.frame(Group = group_name,
+             Avg_Discount = sprintf("%.2f%%", avg_discount * 100))
+}
+
+# Calculate average discounts for each group
+results <- rbind(
+  calc_avg_discount(
+    "Champions (Best customers with highest recency and frequency)",
+    R == "R5" & F %in% c("F4", "F5")
+  ),
+  calc_avg_discount(
+    "Loyal customers (High recency and frequency, but not as recent as Champions)",
+    R %in% c("R3", "R4") & F %in% c("F4", "F5")
+  ),
+  calc_avg_discount(
+    "Potential Loyalists (High recency but lower frequency than Loyal customers)",
+    R == "R4" & F %in% c("F2", "F3")
+  ),
+  calc_avg_discount(
+    "New Customers (Highest recency but lowest frequency)",
+    R == "R5" & F == "F1"
+  ),
+  calc_avg_discount("Promising (High recency but lowest frequency)", R == "R4" &
+                      F == "F1"),
+  calc_avg_discount("Need attention (Medium recency and frequency)", R == "R3" &
+                      F == "F3"),
+  calc_avg_discount(
+    "About to sleep (Medium recency but low frequency)",
+    R == "R3" & F %in% c("F1", "F2")
+  ),
+  calc_avg_discount(
+    "At risk (Low recency and medium frequency)",
+    R %in% c("R1", "R2") & F %in% c("F3", "F4")
+  ),
+  calc_avg_discount(
+    "Can't lose them (Low recency but highest frequency)",
+    R %in% c("R1", "R2") & F == "F5"
+  ),
+  calc_avg_discount(
+    "Hibernating (Low recency and low frequency)",
+    R %in% c("R1", "R2") & F %in% c("F1", "F2")
+  )
+)
+
+# Print the results as a formatted table
+kable(results, align = "l", caption = "Average Discount by Customer Segment")
+
+# Add interpretation and insights
+cat(
+  "The table above shows the average discount percentage for each customer segment based on their recency and frequency scores.
+    Some key observations:
+    - Champions and Loyal customers, who have high recency and frequency, tend to have higher average discounts compared to other segments.
+    - New Customers and Promising segments, despite high recency, have lower average discounts due to their low frequency.
+    - Hibernating customers, with low recency and frequency, have the lowest average discounts among all segments."
+)
+```
+
+# ***Empirical Challenges Faced***
+
+During the course of this RFM segmentation project, several empirical
+challenges were encountered. These challenges highlight the complexities
+and considerations involved in working with real-world customer data.
+Some of the key challenges faced include:
+
+## **Data Quality**
+
+One of the primary challenges was ensuring the quality and integrity of
+the customer transaction data. The dataset required thorough cleaning,
+preprocessing, and validation to handle missing values, outliers, and
+inconsistencies. Ensuring accurate and reliable data was crucial for the
+validity of the RFM analysis and segmentation results.
+
+## **Handling Large Datasets**
+
+The e-commerce dataset contained a substantial number of customer
+records and transactions. Processing and analyzing large volumes of data
+presented computational challenges. Efficient data manipulation
+techniques and optimized algorithms were necessary to handle the dataset
+effectively and generate timely insights.
+
+## **Defining RFM Metrics**
+
+Determining the appropriate definitions and thresholds for the Recency,
+Frequency, and Monetary metrics was a critical challenge. The selection
+of suitable time frames, such as considering the most recent transaction
+date or the entire transaction history, required careful consideration.
+Setting appropriate thresholds for categorizing customers into different
+RFM segments also involved iterative experimentation and domain
+expertise.
+
+## **Handling Skewed Distributions**
+
+The distributions of the RFM metrics, particularly the Frequency and
+Monetary values, exhibited significant skewness. Dealing with skewed
+data required applying appropriate transformations, such as logarithmic
+scaling, to achieve more normalized distributions. This ensured that the
+RFM scores and segments accurately reflected the underlying customer
+behavior patterns.
+
+## **Addressing Outliers**
+
+The presence of outliers in the dataset, such as customers with
+exceptionally high or low RFM values, posed challenges in the
+segmentation process. Outliers can potentially distort the RFM scores
+and segment assignments. Identifying and handling outliers required
+careful consideration, such as setting appropriate thresholds or
+applying robust statistical techniques to mitigate their impact.
+
+## **Selecting Optimal Number of Segments**
+
+Determining the optimal number of customer segments was another
+empirical challenge. While the RFM framework suggests using quintiles,
+the specific number of segments may vary based on the business context
+and data characteristics. Balancing segment granularity and
+interpretability required iterative experimentation and evaluation of
+different segmentation approaches.
+
+## **Validation and Interpretation**
+
+Validating the RFM segmentation results and interpreting the
+characteristics of each segment posed challenges. Assessing the
+stability and robustness of the segments across different time periods
+or data subsets was important to ensure the reliability of the insights.
+Interpreting the segment characteristics and translating them into
+actionable business strategies required collaboration with domain
+experts and stakeholders.
+
+Addressing these empirical challenges required a combination of data
+preprocessing techniques, statistical methods, and domain knowledge.
+Iterative refinement, sensitivity analysis, and collaborative
+discussions with business stakeholders were essential to overcome these
+challenges and derive meaningful insights from the RFM segmentation
+analysis.
+
+# ***Conclusions***
+
+## **Business Recommendation**
+
+### Can’t Lose Them
+
+-   Offer exclusive discounts or incentives.
+
+-   Personalize marketing communications and product recommendations.
+
+-   Consider subscription options or VIP benefits.
+
+### At Risk
+
+-   Create compelling promotions like BOGO deals or bundle pricing.
+
+-   Develop targeted content to restore interest.
+
+-   Use retargeting ads and personalized messaging.
+
+### Hibernating
+
+-   Focus on brand awareness and re-engagement.
+
+-   Encourage social media interactions.
+
+-   Consider reactivation campaigns with incentives.
+
+## **Next Steps**
+
+### Integration with Other Models
+
+-   Predictive Analytics
+
+    -   Forecast customer behavior.
+
+    -   Proactively target customers with personalized offers.
+
+    -   Predict likelihood to purchase, churn probability, or expected
+        lifetime value.
+
+-   Sentiment Analysis
+
+    -   Analyze customer reviews, feedback, and social media
+        interactions.
+
+    -   Gain insights into customer satisfaction, preferences, and pain
+        points.
+
+    -   Tailor marketing messages and improve product offerings.
+
+### Enriching Data
+
+-   Customer Demographics
+
+    -   Incorporate age, gender, location, income level, or education
+        data.
+
+    -   Create comprehensive customer profiles.
+
+    -   Personalize marketing campaigns and product recommendations.
+
+-   Social Media Interactions
+
+    -   Integrate likes, shares, comments, or mentions data.
+
+    -   Understand customer engagement and brand perception.
+
+    -   Identify brand advocates and influencer potential.
+
+### Performance Metrics
+
+-   Key Performance Indicators (KPIs)
+
+    -   Establish clear KPIs for each RFM segment.
+
+    -   Monitor response rates, conversion rates, average order value,
+        customer lifetime value, retention rates, or net promoter score.
+
+    -   Assess the effectiveness of marketing initiatives.
+
+-   Dashboards
+
+    -   Develop interactive dashboards for each RFM segment.
+
+    -   Display key metrics, trends, and comparisons across segments.
+
+    -   Facilitate data-driven decision making.
+
+### Continuous Refinement
+
+-   Regular Updates
+
+    -   Update RFM segmentation model with the latest customer
+        transaction data.
+
+    -   Adapt segmentation and marketing strategies to evolving customer
+        preferences and market conditions.
+
+-   A/B Testing
+
+    -   Evaluate the effectiveness of different marketing approaches for
+        each segment.
+
+    -   Test variations in messaging, offers, channels, or creative
+        elements.
+
+    -   Identify the most impactful strategies for each segment.
+
+-   Customer Feedback
+
+    -   Actively seek and incorporate customer feedback.
+
+    -   Conduct surveys, focus groups, or customer interviews.
+
+    -   Gather qualitative insights into customer preferences,
+        expectations, and experiences.
+
+    -   Refine segment definitions, identify new opportunities, and
+        address gaps.
+
+By integrating RFM segmentation with other models, enriching data,
+establishing performance metrics, and continuously refining the
+approach, businesses can create a comprehensive and dynamic customer
+segmentation strategy. This holistic approach enables companies to
+effectively target, engage, and retain customers, ultimately driving
+business growth and profitability in the ever-evolving e-commerce
+landscape.
